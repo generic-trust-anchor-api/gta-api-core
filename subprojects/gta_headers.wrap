@@ -1,0 +1,16 @@
+#;**********************************************************************;
+# SPDX-License-Identifier: MPL-2.0
+#
+# Copyright (c) 2024, Siemens AG
+#
+#;**********************************************************************;
+
+[wrap-file]
+directory = SC41N2353_supplementary_content_code_components_20240418
+source_url = https://standards.iso.org/iso-iec/ts/30168/ed-1/en/ISO_IEC_TS_30168_ed-1.zip
+source_filename = ISO_IEC_TS_30168_ed-1.zip
+source_hash = 403ff15750078c1107f3700336530303f8eb8634d6766d2286650708f12a083a
+patch_directory = gta_headers
+
+[provide]
+gta_headers = gta_header_dep

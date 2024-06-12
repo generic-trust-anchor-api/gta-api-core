@@ -1,0 +1,9 @@
+#;**********************************************************************;
+# SPDX-License-Identifier: MPL-2.0
+#
+# Copyright (c) 2024, Siemens AG
+#
+#;**********************************************************************;
+
+option('build', type : 'combo', choices : ['debug', 'release' ], value : 'debug', description : 'Select build type with associated tool configuration')
+option('build-dependencies', type : 'boolean', value : true, yield: true, description : 'Select whether to build dependencies locally rather than use system installed libraries.')
