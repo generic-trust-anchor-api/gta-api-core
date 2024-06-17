@@ -763,6 +763,9 @@ test_gta_personality(void ** state)
         (gtaio_istream_t *)&personality_content, NULL, NULL,
         protection_properties, &errinfo));
 
+    /* personality remove */
+    assert_true(gta_personality_remove(framework_test_params->h_ctx, &errinfo));
+
     /* negative tests for gta_personality_enumerate */
     assert_false(gta_personality_enumerate(NULL, "identifier1", &h_enum, 99,
         &personality_name, &errinfo));
@@ -1070,12 +1073,6 @@ test_gta_personality_enroll_auth(void ** state)
 
 static void
 test_gta_personality_attestate(void ** state)
-{
-    /* todo */
-}
-
-static void
-test_gta_personality_remove(void ** state)
 {
     /* todo */
 }
@@ -1562,7 +1559,6 @@ int ts_framework(void)
         cmocka_unit_test(test_gta_personality_enroll),
         cmocka_unit_test(test_gta_personality_enroll_auth),
         cmocka_unit_test(test_gta_personality_attestate),
-        cmocka_unit_test(test_gta_personality_remove),
         cmocka_unit_test(test_gta_personality_deactivate),
         cmocka_unit_test(test_gta_personality_activate),
         cmocka_unit_test(test_gta_personality_add_trusted_attribute),

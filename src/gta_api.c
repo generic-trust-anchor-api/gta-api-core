@@ -2168,6 +2168,25 @@ GTA_DEFINE_FUNCTION(bool, gta_personality_enroll, (
     return false;
 }
 
+GTA_DEFINE_FUNCTION(bool, gta_personality_remove, (
+    gta_context_handle_t h_ctx,
+    gta_errinfo_t * p_errinfo
+))
+{
+    context_object_t * p_ctx_obj = NULL_PTR;
+
+    if (true != basic_pointer_validation(p_errinfo)) {
+        return false;
+    }
+
+    p_ctx_obj = check_context_handle(h_ctx, p_errinfo);
+    if (NULL != p_ctx_obj) {
+        return GTA_PROVIDER_FWD_FUNCTION(p_ctx_obj->p_provider,
+            gta_personality_remove, (h_ctx, p_errinfo));
+    }
+    *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    return false;
+}
 
 GTA_DEFINE_FUNCTION(bool, gta_personality_add_trusted_attribute, (
         gta_context_handle_t h_ctx,
