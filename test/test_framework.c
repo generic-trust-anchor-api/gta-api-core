@@ -957,13 +957,25 @@ test_gta_context_set_attribute(void ** state)
 static void
 test_gta_devicestate_transition(void ** state)
 {
-    /* todo */
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+
+    assert_false(gta_devicestate_transition(framework_test_params->h_inst, NULL, 10, NULL));
+    assert_false(gta_devicestate_transition(NULL, NULL, 10, &errinfo));
+
+    assert_true(gta_devicestate_transition(framework_test_params->h_inst, NULL, 10, &errinfo));
 }
 
 static void
 test_gta_devicestate_recede(void ** state)
 {
-    /* todo */
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+
+    assert_false(gta_devicestate_recede(framework_test_params->h_inst, NULL, NULL));
+    assert_false(gta_devicestate_recede(NULL, NULL, &errinfo));
+
+    assert_true(gta_devicestate_recede(framework_test_params->h_inst, NULL, &errinfo));
 }
 
 static void
