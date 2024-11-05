@@ -3255,14 +3255,18 @@ static const struct access_policy_object_t *
 check_access_policy_handle(gta_context_handle_t h_access_policy, bool simple, gta_errinfo_t * p_errinfo)
 {
     struct access_policy_object_t * p_access_policy_obj = NULL;
+    gta_errinfo_t errinfo = GTA_ERROR_INTERNAL_ERROR;
 
-    p_access_policy_obj = (struct access_policy_object_t *)check_handle(h_access_policy, GTA_HANDLE_TYPE_ACCESS_POLICY, p_errinfo);
+    p_access_policy_obj = (struct access_policy_object_t *)check_handle(h_access_policy, GTA_HANDLE_TYPE_ACCESS_POLICY, &errinfo);
 
     /* check whether simple access policies are permitted within the callers context */
-    if (   NULL == p_access_policy_obj
-        && simple)
-    {
-        p_access_policy_obj = (struct access_policy_object_t *)check_handle(h_access_policy, GTA_HANDLE_TYPE_ACCESS_POLICY_SIMPLE, p_errinfo);
+    if (NULL == p_access_policy_obj) {
+        if (simple) {
+            p_access_policy_obj = (struct access_policy_object_t *)check_handle(h_access_policy, GTA_HANDLE_TYPE_ACCESS_POLICY_SIMPLE, p_errinfo);
+        }
+        else {
+            *p_errinfo = errinfo;
+        }
     }
 
     return p_access_policy_obj;
