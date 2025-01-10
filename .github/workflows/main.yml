@@ -1,0 +1,24 @@
+#;**********************************************************************;
+# SPDX-License-Identifier: MPL-2.0
+#
+# Copyright (c) 2025, Siemens AG
+#
+# All rights reserved.
+#;**********************************************************************;
+
+name: CI
+on: 
+  [workflow_dispatch, push]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build
+        run: |
+          sudo apt-get update && sudo apt-get install -y libcmocka-dev meson ninja-build build-essential libssl-dev cmake pkg-config git
+          meson setup build
+          ninja -C build test
+          DESTDIR=inst ninja -C build install
