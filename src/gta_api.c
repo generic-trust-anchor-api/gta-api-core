@@ -923,7 +923,9 @@ GTA_DEFINE_FUNCTION(bool, gta_access_token_get_basic,
                 p_errinfo));
         free_handle(h_inst_provider, &errinfo_tmp);
     }
-    *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    else {
+        *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    }
     return b_ret;
 }
 
