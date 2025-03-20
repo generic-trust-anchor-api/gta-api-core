@@ -107,13 +107,7 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_access_token_get_basic,
     gta_errinfo_t * p_errinfo
     ))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 
@@ -137,13 +131,7 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_access_token_revoke,
     gta_errinfo_t * p_errinfo
     ))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_context_auth_set_access_token,

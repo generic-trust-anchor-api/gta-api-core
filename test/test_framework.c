@@ -841,7 +841,41 @@ test_gta_access_token_get_issuing(void ** state)
 static void
 test_gta_access_token_get_basic(void ** state)
 {
-    /* todo */
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gta_access_token_t granting_token = { 0 };
+    gta_access_token_t token = { 0 };
+
+    assert_false(gta_access_token_get_basic(NULL,
+        granting_token,
+        "personality_name",
+        GTA_ACCESS_TOKEN_USAGE_USE,
+        token,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_false(gta_access_token_get_basic(framework_test_params->h_inst,
+        NULL,
+        "personality_name",
+        GTA_ACCESS_TOKEN_USAGE_USE,
+        token,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_access_token_get_basic(framework_test_params->h_inst,
+        granting_token,
+        NULL,
+        GTA_ACCESS_TOKEN_USAGE_USE,
+        token,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_true(gta_access_token_get_basic(framework_test_params->h_inst,
+        granting_token,
+        "personality_name",
+        GTA_ACCESS_TOKEN_USAGE_USE,
+        token,
+        &errinfo));
 }
 
 static void
@@ -875,7 +909,23 @@ test_gta_access_token_get_pers_derived(void ** state)
 static void
 test_gta_access_token_revoke(void ** state)
 {
-    /* todo */
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gta_access_token_t token = { 0 };
+
+    assert_false(gta_access_token_revoke(NULL,
+        token,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_false(gta_access_token_revoke(framework_test_params->h_inst,
+        NULL,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_true(gta_access_token_revoke(framework_test_params->h_inst,
+        token,
+        &errinfo));
 }
 
 static void
@@ -1544,12 +1594,12 @@ int ts_framework(void)
         cmocka_unit_test(test_gta_context_get_params),
         cmocka_unit_test(test_gta_provider_get_params),
         cmocka_unit_test(test_gta_access_policy),
-        /* TODO */
-        cmocka_unit_test(test_gta_access_token_get_physical_presence),
-        cmocka_unit_test(test_gta_access_token_get_issuing),
         cmocka_unit_test(test_gta_access_token_get_basic),
         cmocka_unit_test(test_gta_access_token_get_pers_derived),
         cmocka_unit_test(test_gta_access_token_revoke),
+        /* TODO */
+        cmocka_unit_test(test_gta_access_token_get_physical_presence),
+        cmocka_unit_test(test_gta_access_token_get_issuing),
         cmocka_unit_test(test_gta_context_auth_set_access_token),
         cmocka_unit_test(test_gta_context_auth_get_challenge),
         cmocka_unit_test(test_gta_context_auth_set_random),
