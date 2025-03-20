@@ -903,6 +903,12 @@ GTA_DEFINE_FUNCTION(bool, gta_access_token_get_basic,
         return false;
     }
 
+    /* Range check on usage */
+    if (usage > GTA_ACCESS_TOKEN_USAGE_RECEDE) {
+        *p_errinfo = GTA_ERROR_INVALID_PARAMETER;
+        return false;
+    }
+
     if ((p_inst_obj = check_instance_handle(h_inst, p_errinfo))) {
         /* TODO: Currently it is not clear how to select the matching provider
          * or whether forward the request to all registered providers. This
@@ -942,6 +948,12 @@ GTA_DEFINE_FUNCTION(bool, gta_access_token_get_pers_derived,
     context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, target_personality_name, p_pers_derived_access_token)) {
+        return false;
+    }
+
+    /* Range check on usage */
+    if (usage > GTA_ACCESS_TOKEN_USAGE_RECEDE) {
+        *p_errinfo = GTA_ERROR_INVALID_PARAMETER;
         return false;
     }
 
