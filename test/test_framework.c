@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MPL-2.0 */
 /**********************************************************************
- * Copyright (c) 2024, Siemens AG
+ * Copyright (c) 2024-2025, Siemens AG
  **********************************************************************/
 
 #include <stdlib.h>
@@ -730,6 +730,9 @@ test_gta_personality(void ** state)
     gtaio_istream_t personality_content = { 0 };
     gta_enum_handle_t h_enum = GTA_HANDLE_ENUM_FIRST;
     gtaio_ostream_t personality_name = { 0 };
+    gta_access_policy_handle_t h_auth = gta_access_policy_simple(framework_test_params->h_inst, GTA_ACCESS_DESCRIPTOR_TYPE_INITIAL, &errinfo);
+    assert_non_null(h_auth);
+    
 
     /* gta_personality_create */
     assert_false(gta_personality_create(framework_test_params->h_inst, NULL,
@@ -738,12 +741,23 @@ test_gta_personality(void ** state)
 
     /* should fail, because a personality with this name already exists */
     assert_false(gta_personality_create(framework_test_params->h_inst,
-        "identifier", "personality2", "provider_test", "profile1", NULL, NULL,
+        "identifier", "personality2", "provider_test", "profile1", h_auth, h_auth,
         protection_properties, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_NAME_ALREADY_EXISTS);
 
+    /* invalid auth handles */
+    assert_false(gta_personality_create(framework_test_params->h_inst,
+        "identifier", "personality2", "provider_test", "profile1", h_auth, GTA_HANDLE_INVALID,
+        protection_properties, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_ACCESS_POLICY);
+
+    assert_false(gta_personality_create(framework_test_params->h_inst,
+        "identifier", "personality2", "provider_test", "profile1", framework_test_params->h_inst, h_auth,
+        protection_properties, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_ACCESS_POLICY);
+
     assert_true(gta_personality_create(framework_test_params->h_inst,
-        "identifier","personality4", "provider_test", "profile1", NULL, NULL,
+        "identifier","personality4", "provider_test", "profile1", h_auth, h_auth,
         protection_properties, &errinfo));
 
     /* gta_personality_deploy */
@@ -754,13 +768,13 @@ test_gta_personality(void ** state)
     /* should fail, because a personality with this name already exists */
     assert_false(gta_personality_deploy(framework_test_params->h_inst,
         "identifier", "personality2", "provider_test", "profile1",
-        (gtaio_istream_t *)&personality_content, NULL, NULL,
+        (gtaio_istream_t *)&personality_content, h_auth, h_auth,
         protection_properties, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_NAME_ALREADY_EXISTS);
 
     assert_true(gta_personality_deploy(framework_test_params->h_inst,
         "identifier", "personality4", "provider_test", "profile1",
-        (gtaio_istream_t *)&personality_content, NULL, NULL,
+        (gtaio_istream_t *)&personality_content, h_auth, h_auth,
         protection_properties, &errinfo));
 
     /* negative tests for gta_personality_enumerate */
@@ -1567,9 +1581,11 @@ test_gta_personality_create_wo_provider(void ** state)
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
     struct gta_protection_properties_t protection_properties = { 0 };
+    gta_access_policy_handle_t h_auth = gta_access_policy_simple(framework_test_params->h_inst, GTA_ACCESS_DESCRIPTOR_TYPE_INITIAL, &errinfo);
+    assert_non_null(h_auth);
 
     assert_false(gta_personality_create(framework_test_params->h_inst,
-        "identifier4", "personality4", "application", "profile1", NULL, NULL,
+        "identifier4", "personality4", "application", "profile1", h_auth, h_auth,
         protection_properties, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
 }
@@ -1581,10 +1597,12 @@ test_gta_personality_deploy_wo_provider(void ** state)
     gta_errinfo_t errinfo = 0;
     struct gta_protection_properties_t protection_properties = { 0 };
     gtaio_istream_t personality_content = { 0 };
+    gta_access_policy_handle_t h_auth = gta_access_policy_simple(framework_test_params->h_inst, GTA_ACCESS_DESCRIPTOR_TYPE_INITIAL, &errinfo);
+    assert_non_null(h_auth);
 
     assert_false(gta_personality_deploy(framework_test_params->h_inst,
         "identifier4", "personality4", "application", "profile1",
-        (gtaio_istream_t *)&personality_content, NULL, NULL,
+        (gtaio_istream_t *)&personality_content, h_auth, h_auth,
         protection_properties, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
 }

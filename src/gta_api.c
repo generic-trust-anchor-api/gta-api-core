@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MPL-2.0 */
 /**********************************************************************
- * Copyright (c) 2024, Siemens AG
+ * Copyright (c) 2024-2025, Siemens AG
  **********************************************************************/
 
 #include <stdbool.h>
@@ -2201,12 +2201,20 @@ personality_deploy_create(
 
     /* Check handle */
     if (NULL != p_inst_obj) {
-        /* Check for potential name clashes */
-        if (NULL == find_personality(h_inst, personality_name, p_errinfo)) {
-            p_provider = select_provider_by_profile(h_inst, profile, p_errinfo);
+        /* Check auth handles */
+        if ((NULL != check_access_policy_handle(auth_admin, true, p_errinfo))
+            && (NULL != check_access_policy_handle(auth_use, true, p_errinfo))) {
+
+            /* Check for potential name clashes */
+            if (NULL == find_personality(h_inst, personality_name, p_errinfo)) {
+                p_provider = select_provider_by_profile(h_inst, profile, p_errinfo);
+            }
+            else {
+                *p_errinfo = GTA_ERROR_NAME_ALREADY_EXISTS;
+            }
         }
         else {
-            *p_errinfo = GTA_ERROR_NAME_ALREADY_EXISTS;
+            *p_errinfo = GTA_ERROR_ACCESS_POLICY;
         }
     }
     else {
