@@ -829,13 +829,45 @@ test_gta_provider_get_params(void ** state)
 static void
 test_gta_access_token_get_physical_presence(void ** state)
 {
-    /* todo */
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gta_access_token_t physical_presence_token = { 0 };
+
+    assert_false(gta_access_token_get_physical_presence(NULL,
+        physical_presence_token,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_false(gta_access_token_get_physical_presence(framework_test_params->h_inst,
+        NULL,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_true(gta_access_token_get_physical_presence(framework_test_params->h_inst,
+        physical_presence_token,
+        &errinfo));
 }
 
 static void
 test_gta_access_token_get_issuing(void ** state)
 {
-    /* todo */
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gta_access_token_t granting_token = { 0 };
+
+    assert_false(gta_access_token_get_issuing(NULL,
+        granting_token,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_false(gta_access_token_get_issuing(framework_test_params->h_inst,
+        NULL,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_true(gta_access_token_get_issuing(framework_test_params->h_inst,
+        granting_token,
+        &errinfo));
 }
 
 static void
@@ -1609,12 +1641,12 @@ int ts_framework(void)
         cmocka_unit_test(test_gta_context_get_params),
         cmocka_unit_test(test_gta_provider_get_params),
         cmocka_unit_test(test_gta_access_policy),
+        cmocka_unit_test(test_gta_access_token_get_physical_presence),
+        cmocka_unit_test(test_gta_access_token_get_issuing),
         cmocka_unit_test(test_gta_access_token_get_basic),
         cmocka_unit_test(test_gta_access_token_get_pers_derived),
         cmocka_unit_test(test_gta_access_token_revoke),
         /* TODO */
-        cmocka_unit_test(test_gta_access_token_get_physical_presence),
-        cmocka_unit_test(test_gta_access_token_get_issuing),
         cmocka_unit_test(test_gta_context_auth_set_access_token),
         cmocka_unit_test(test_gta_context_auth_get_challenge),
         cmocka_unit_test(test_gta_context_auth_set_random),

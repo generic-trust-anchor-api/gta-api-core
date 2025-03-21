@@ -882,6 +882,94 @@ GTA_DEFINE_FUNCTION(bool, gta_context_close,
 }
 
 
+GTA_DEFINE_FUNCTION(bool, gta_access_token_get_physical_presence,
+(
+    gta_instance_handle_t h_inst,
+    gta_access_token_t physical_presence_token,
+    gta_errinfo_t * p_errinfo
+))
+{
+    bool b_ret = false;
+    instance_object_t * p_inst_obj = NULL;
+    struct provider_list_item_t * p_provider_list_item = NULL_PTR;
+    gta_instance_handle_t h_inst_provider = GTA_HANDLE_INVALID;
+    struct instance_provider_object_t * p_instance_provider_obj = NULL_PTR;
+    gta_errinfo_t errinfo_tmp = GTA_ERROR_INTERNAL_ERROR;
+
+    if (true != basic_pointer_validation(p_errinfo, physical_presence_token)) {
+        return false;
+    }
+
+    if ((p_inst_obj = check_instance_handle(h_inst, p_errinfo))) {
+        /* TODO: Currently it is not clear how to select the matching provider
+         * or whether forward the request to all registered providers. This
+         * "hack" assumes that only one provider is registered and therefore
+         * simply the first provider in the list is selected.
+         */
+        p_provider_list_item = p_inst_obj->p_provider_list;
+        h_inst_provider = alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER,
+            p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
+        if (GTA_HANDLE_INVALID != h_inst_provider) {
+            p_instance_provider_obj->h_inst = h_inst;
+            p_instance_provider_obj->p_provider = p_provider_list_item;
+        }
+
+        b_ret = GTA_PROVIDER_FWD_FUNCTION(p_provider_list_item,
+            gta_access_token_get_physical_presence, (h_inst_provider,
+                physical_presence_token, p_errinfo));
+        free_handle(h_inst_provider, &errinfo_tmp);
+    }
+    else {
+        *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    }
+    return b_ret;
+}
+
+
+GTA_DEFINE_FUNCTION(bool, gta_access_token_get_issuing,
+(
+    gta_instance_handle_t h_inst,
+    gta_access_token_t granting_token,
+    gta_errinfo_t * p_errinfo
+))
+{
+    bool b_ret = false;
+    instance_object_t * p_inst_obj = NULL;
+    struct provider_list_item_t * p_provider_list_item = NULL_PTR;
+    gta_instance_handle_t h_inst_provider = GTA_HANDLE_INVALID;
+    struct instance_provider_object_t * p_instance_provider_obj = NULL_PTR;
+    gta_errinfo_t errinfo_tmp = GTA_ERROR_INTERNAL_ERROR;
+
+    if (true != basic_pointer_validation(p_errinfo, granting_token)) {
+        return false;
+    }
+
+    if ((p_inst_obj = check_instance_handle(h_inst, p_errinfo))) {
+        /* TODO: Currently it is not clear how to select the matching provider
+         * or whether forward the request to all registered providers. This
+         * "hack" assumes that only one provider is registered and therefore
+         * simply the first provider in the list is selected.
+         */
+        p_provider_list_item = p_inst_obj->p_provider_list;
+        h_inst_provider = alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER,
+            p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
+        if (GTA_HANDLE_INVALID != h_inst_provider) {
+            p_instance_provider_obj->h_inst = h_inst;
+            p_instance_provider_obj->p_provider = p_provider_list_item;
+        }
+
+        b_ret = GTA_PROVIDER_FWD_FUNCTION(p_provider_list_item,
+            gta_access_token_get_issuing, (h_inst_provider,
+                granting_token, p_errinfo));
+        free_handle(h_inst_provider, &errinfo_tmp);
+    }
+    else {
+        *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    }
+    return b_ret;
+}
+
+
 GTA_DEFINE_FUNCTION(bool, gta_access_token_get_basic,
 (
     gta_instance_handle_t h_inst,
