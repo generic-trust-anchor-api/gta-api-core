@@ -2168,7 +2168,7 @@ GTA_DEFINE_FUNCTION(bool, gta_personality_deploy,
 {
     bool b_ret = false;
 
-    if (true == basic_pointer_validation(p_errinfo, identifier_value, personality_name, application, profile, personality_content)) {
+    if (true == basic_pointer_validation(p_errinfo, identifier_value, personality_name, application, profile, personality_content, auth_use, auth_admin)) {
         b_ret = personality_deploy_create(h_inst, identifier_value,
             personality_name, application, profile, personality_content,
             auth_use, auth_admin, requested_protection_properties, p_errinfo);
@@ -2193,7 +2193,7 @@ GTA_DEFINE_FUNCTION(bool, gta_personality_create,
 {
     bool b_ret = false;
 
-    if (true == basic_pointer_validation(p_errinfo, identifier_value, personality_name, application, profile)) {
+    if (true == basic_pointer_validation(p_errinfo, identifier_value, personality_name, application, profile, auth_use, auth_admin)) {
         b_ret = personality_deploy_create(h_inst, identifier_value,
             personality_name, application, profile, NULL, auth_use, auth_admin,
             requested_protection_properties, p_errinfo);
