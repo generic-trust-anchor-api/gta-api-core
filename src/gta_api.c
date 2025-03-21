@@ -1203,6 +1203,112 @@ GTA_DEFINE_FUNCTION(bool, gta_context_set_attribute,
     return false;
 }
 
+
+GTA_DEFINE_FUNCTION(bool, gta_devicestate_transition,
+(
+    gta_instance_handle_t h_inst,
+    gta_access_policy_handle_t h_auth_recede,
+    size_t owner_lock_count,
+    gta_errinfo_t * p_errinfo
+))
+{
+    bool b_ret = false;
+    gta_errinfo_t errinfo = 0;
+    gta_instance_handle_t h_inst_provider = GTA_HANDLE_INVALID;
+    struct instance_provider_object_t * p_instance_provider_obj = NULL_PTR;
+
+    instance_object_t * p_inst_obj = NULL_PTR;
+    struct provider_list_item_t * p_provider_list_item = NULL_PTR;
+
+    if (true != basic_pointer_validation(p_errinfo)) {
+        return false;
+    }
+
+    p_inst_obj = check_instance_handle(h_inst, p_errinfo);
+
+    if (NULL != p_inst_obj) {
+        /* Check h_auth_recede */
+        if (NULL != check_access_policy_handle(h_auth_recede, true, p_errinfo)) {
+            /* wrap h_inst */
+            p_provider_list_item = p_inst_obj->p_provider_list;
+            h_inst_provider = alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER,
+                p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
+            if (GTA_HANDLE_INVALID != h_inst_provider) {
+                p_instance_provider_obj->h_inst = h_inst;
+                p_instance_provider_obj->p_provider = p_provider_list_item;
+                /* todo: forward this to all provider */
+                b_ret = GTA_PROVIDER_FWD_FUNCTION(
+                                        p_provider_list_item, gta_devicestate_transition,
+                                        (h_inst_provider, h_auth_recede,
+                                        owner_lock_count, p_errinfo));
+
+                free_handle(h_inst_provider, &errinfo);
+            }
+            else {
+                *p_errinfo = GTA_ERROR_HANDLES_EXAUSTED;
+            }
+        }
+        else {
+            *p_errinfo = GTA_ERROR_ACCESS_POLICY;
+        }
+    }
+    else {
+        *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    }
+
+    return b_ret;
+}
+
+
+GTA_DEFINE_FUNCTION(bool, gta_devicestate_recede,
+(
+    gta_instance_handle_t h_inst,
+    gta_access_token_t access_token,
+    gta_errinfo_t * p_errinfo
+))
+{
+    bool b_ret = false;
+    gta_errinfo_t errinfo = 0;
+    gta_instance_handle_t h_inst_provider = GTA_HANDLE_INVALID;
+    struct instance_provider_object_t * p_instance_provider_obj = NULL_PTR;
+
+    instance_object_t * p_inst_obj = NULL_PTR;
+    struct provider_list_item_t * p_provider_list_item = NULL_PTR;
+
+    /* todo: Clarify if access token is allowed to be NULL */
+    if (true != basic_pointer_validation(p_errinfo)) {
+        return false;
+    }
+
+    p_inst_obj = check_instance_handle(h_inst, p_errinfo);
+
+    if (NULL != p_inst_obj) {
+        /* wrap h_inst */
+        p_provider_list_item = p_inst_obj->p_provider_list;
+        h_inst_provider = alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER,
+            p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
+        if (GTA_HANDLE_INVALID != h_inst_provider) {
+            p_instance_provider_obj->h_inst = h_inst;
+            p_instance_provider_obj->p_provider = p_provider_list_item;
+            /* todo: forward this to all provider */
+            b_ret = GTA_PROVIDER_FWD_FUNCTION(
+                                    p_provider_list_item, gta_devicestate_recede,
+                                    (h_inst_provider, access_token, p_errinfo));
+
+            free_handle(h_inst_provider, &errinfo);
+        }
+        else {
+            *p_errinfo = GTA_ERROR_HANDLES_EXAUSTED;
+        }
+    }
+    else {
+        *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    }
+
+    return b_ret;
+}
+
+
 GTA_DEFINE_FUNCTION(void *, gta_context_get_provider_params,
 (
     gta_context_handle_t h_ctx,
@@ -3322,14 +3428,18 @@ static const struct access_policy_object_t *
 check_access_policy_handle(gta_context_handle_t h_access_policy, bool simple, gta_errinfo_t * p_errinfo)
 {
     struct access_policy_object_t * p_access_policy_obj = NULL;
+    gta_errinfo_t errinfo = GTA_ERROR_INTERNAL_ERROR;
 
-    p_access_policy_obj = (struct access_policy_object_t *)check_handle(h_access_policy, GTA_HANDLE_TYPE_ACCESS_POLICY, p_errinfo);
+    p_access_policy_obj = (struct access_policy_object_t *)check_handle(h_access_policy, GTA_HANDLE_TYPE_ACCESS_POLICY, &errinfo);
 
     /* check whether simple access policies are permitted within the callers context */
-    if (   NULL == p_access_policy_obj
-        && simple)
-    {
-        p_access_policy_obj = (struct access_policy_object_t *)check_handle(h_access_policy, GTA_HANDLE_TYPE_ACCESS_POLICY_SIMPLE, p_errinfo);
+    if (NULL == p_access_policy_obj) {
+        if (simple) {
+            p_access_policy_obj = (struct access_policy_object_t *)check_handle(h_access_policy, GTA_HANDLE_TYPE_ACCESS_POLICY_SIMPLE, p_errinfo);
+        }
+        else {
+            *p_errinfo = errinfo;
+        }
     }
 
     return p_access_policy_obj;

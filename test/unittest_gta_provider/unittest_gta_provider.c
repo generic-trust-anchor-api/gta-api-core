@@ -254,13 +254,7 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_devicestate_transition,
     gta_errinfo_t * p_errinfo
     ))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 
@@ -271,13 +265,7 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_devicestate_recede,
     gta_errinfo_t * p_errinfo
     ))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 
