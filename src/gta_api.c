@@ -1035,12 +1035,22 @@ GTA_DEFINE_FUNCTION(bool, gta_access_token_get_pers_derived,
 {
     context_object_t * p_ctx_obj = NULL_PTR;
 
-    if (true != basic_pointer_validation(p_errinfo, target_personality_name, p_pers_derived_access_token)) {
+    if (true != basic_pointer_validation(p_errinfo, p_pers_derived_access_token)) {
         return false;
     }
 
     /* Range check on usage */
     if (usage > GTA_ACCESS_TOKEN_USAGE_RECEDE) {
+        *p_errinfo = GTA_ERROR_INVALID_PARAMETER;
+        return false;
+    }
+
+    /*
+     * Advanced input validation for target_personality_name:
+     * In case of GTA_ACCESS_TOKEN_USAGE_RECEDE target_personality_name is
+     * ignored and can be NULL.
+     */
+    if ((GTA_ACCESS_TOKEN_USAGE_RECEDE != usage) && (NULL == target_personality_name)) {
         *p_errinfo = GTA_ERROR_INVALID_PARAMETER;
         return false;
     }

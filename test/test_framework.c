@@ -960,9 +960,22 @@ test_gta_access_token_get_pers_derived(void ** state)
         &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
+    assert_false(gta_access_token_get_pers_derived(framework_test_params->h_ctx,
+        "personality_name",
+        GTA_ACCESS_TOKEN_USAGE_USE,
+        NULL,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
     assert_true(gta_access_token_get_pers_derived(framework_test_params->h_ctx,
         "personality_name",
         GTA_ACCESS_TOKEN_USAGE_USE,
+        &token,
+        &errinfo));
+
+    assert_true(gta_access_token_get_pers_derived(framework_test_params->h_ctx,
+        NULL,
+        GTA_ACCESS_TOKEN_USAGE_RECEDE,
         &token,
         &errinfo));
 }
