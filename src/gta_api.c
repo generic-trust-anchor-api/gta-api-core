@@ -991,8 +991,8 @@ GTA_DEFINE_FUNCTION(bool, gta_access_token_get_basic,
         return false;
     }
 
-    /* Range check on usage */
-    if (usage > GTA_ACCESS_TOKEN_USAGE_RECEDE) {
+    /* Range check on usage. Only "use" and "admin" are allowed here. */
+    if (usage > GTA_ACCESS_TOKEN_USAGE_ADMIN) {
         *p_errinfo = GTA_ERROR_INVALID_PARAMETER;
         return false;
     }

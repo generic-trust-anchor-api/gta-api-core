@@ -919,7 +919,7 @@ test_gta_access_token_get_basic(void ** state)
     assert_false(gta_access_token_get_basic(framework_test_params->h_inst,
         granting_token,
         "personality_name",
-        3,
+        GTA_ACCESS_TOKEN_USAGE_RECEDE,
         token,
         &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
