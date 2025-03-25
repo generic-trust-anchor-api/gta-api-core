@@ -349,6 +349,7 @@ test_gta_access_policy(void ** state)
     size_t simple_access_token_descriptor_cnt = 0;
     size_t basic_access_token_descriptor_cnt = 0;
     size_t pers_derived_access_token_descriptor_cnt = 0;
+    size_t physical_presence_access_token_descriptor_cnt = 0;
 
     gta_access_policy_handle_t h_access_policy = GTA_HANDLE_INVALID;
     gta_personality_fingerprint_t personality_fingerprint = {
@@ -491,6 +492,16 @@ test_gta_access_policy(void ** state)
     assert_true(gta_access_policy_add_pers_derived_access_token_descriptor(
         h_access_policy, personality_fingerprint, profile, &errinfo));
 
+    assert_false(gta_access_policy_add_physical_presence_access_token_descriptor(
+        NULL, NULL));
+    assert_false(gta_access_policy_add_physical_presence_access_token_descriptor(
+        NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+    assert_true(gta_access_policy_add_physical_presence_access_token_descriptor(
+        h_access_policy, &errinfo));
+    assert_true(gta_access_policy_add_physical_presence_access_token_descriptor(
+        h_access_policy, &errinfo));
+
     /* enumerate the tokens in the access policy */
     h_enum = GTA_HANDLE_ENUM_FIRST;
     do
@@ -565,6 +576,20 @@ test_gta_access_policy(void ** state)
                 assert_int_equal(0, memcmp(p_attr, personality_fingerprint, attr_len));
 
                 break;
+            case GTA_ACCESS_DESCRIPTOR_TYPE_PHYSICAL_PRESENCE_TOKEN:
+                physical_presence_access_token_descriptor_cnt++;
+
+                assert_false(gta_access_policy_get_access_descriptor_attribute(
+                    h_access_token_descriptor, GTA_ACCESS_DESCRIPTOR_ATTR_PROFILE_NAME,
+                    &p_attr, &attr_len, &errinfo));
+                assert_int_equal(GTA_ERROR_INVALID_ATTRIBUTE, errinfo);
+
+                assert_false(gta_access_policy_get_access_descriptor_attribute(
+                    h_access_token_descriptor, GTA_ACCESS_DESCRIPTOR_ATTR_PERS_FINGERPRINT,
+                    &p_attr, &attr_len, &errinfo));
+                assert_int_equal(GTA_ERROR_INVALID_ATTRIBUTE, errinfo);
+
+                break;
             default:
                 assert_true(false);
                 break;
@@ -576,6 +601,7 @@ test_gta_access_policy(void ** state)
     assert_int_equal(h_enum, GTA_HANDLE_INVALID);
     assert_int_equal(1, basic_access_token_descriptor_cnt);
     assert_int_equal(1, pers_derived_access_token_descriptor_cnt);
+    assert_int_equal(1, physical_presence_access_token_descriptor_cnt);
 
     assert_false(gta_access_policy_destroy(h_access_policy, NULL));
     assert_true(gta_access_policy_destroy(h_access_policy, &errinfo));
