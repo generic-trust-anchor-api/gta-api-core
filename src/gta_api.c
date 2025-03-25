@@ -282,12 +282,16 @@ struct access_policy_object_t {
     /* list of access token descriptors */
     struct access_token_descriptor_object_list_item_t * p_access_token_descriptor_list;
 
-    /* There can be only one initial and one basic access token.
-       These pointers provide a shortcut into the access token
-       descriptor list. initial_access_token_descriptor.p_next and
-       basic_access_token_descriptor.p_next must not be used. */
+    /*
+     * There can be only one initial, one basic and one physical presence access
+     * token descriptor.
+     * These pointers provide a shortcut into the access token descriptor list.
+     * initial_access_token_descriptor.p_next and
+     * basic_access_token_descriptor.p_next must not be used.
+     */
     struct access_token_descriptor_object_list_item_t * p_initial_access_token_descriptor;
     struct access_token_descriptor_object_list_item_t * p_basic_access_token_descriptor;
+    struct access_token_descriptor_object_list_item_t * p_physical_presence_access_token_descriptor;
 };
 
 static object_t *
@@ -1463,6 +1467,53 @@ GTA_DEFINE_FUNCTION(bool, gta_access_policy_destroy,
     return false;
 }
 
+
+GTA_DEFINE_FUNCTION(bool, gta_access_policy_add_physical_presence_access_token_descriptor,
+(
+    gta_access_policy_handle_t h_access_policy,
+    gta_errinfo_t * p_errinfo
+    ))
+{
+    struct access_policy_object_t * p_access_policy_obj = NULL_PTR;
+    struct access_token_descriptor_object_list_item_t * p_token_descriptor_object = NULL_PTR;
+    gta_access_descriptor_handle_t h_token_descriptor = GTA_HANDLE_INVALID;
+
+    if (true != basic_pointer_validation(p_errinfo)) {
+        return false;
+    }
+
+    p_access_policy_obj = (/* const_cast */struct access_policy_object_t *)
+        check_access_policy_handle(h_access_policy, false, p_errinfo);
+    if (p_access_policy_obj)
+    {
+        /* physical presence access policy descriptor is a singleton */
+        if (p_access_policy_obj->p_physical_presence_access_token_descriptor == NULL) {
+
+            /* Allocate access token descriptor.
+               This is done via alloc_handle() as gta_access_policy_enumerate()
+               is supposed to return handles.
+               The access token descriptor itself does not contain any private/sensible information. */
+            h_token_descriptor = alloc_handle(GTA_HANDLE_TYPE_ACCESS_TOKEN_DESCRIPTOR, p_access_policy_obj,
+                (void **)(&p_token_descriptor_object), p_errinfo);
+            if (GTA_HANDLE_INVALID == h_token_descriptor) goto err;
+
+            p_token_descriptor_object->h_self = h_token_descriptor;
+            p_token_descriptor_object->type = GTA_ACCESS_DESCRIPTOR_TYPE_PHYSICAL_PRESENCE_TOKEN;
+            p_access_policy_obj->p_physical_presence_access_token_descriptor = p_token_descriptor_object;
+            list_append_front((struct list_t **)(&(p_access_policy_obj->p_access_token_descriptor_list)),
+                p_token_descriptor_object);
+        }
+    }
+    else {
+        return false;
+    }
+
+    return true;
+
+    /* error handling */
+err:
+    return false;
+}
 
 
 GTA_DEFINE_FUNCTION(bool, gta_access_policy_add_basic_access_token_descriptor,
