@@ -819,6 +819,24 @@ test_gta_personality(void ** state)
     assert_false(gta_personality_enumerate(framework_test_params->h_inst,
         "identifier1", &h_enum, 99, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    /* gta_personality_remove */
+    assert_false(gta_personality_remove(NULL, NULL));
+    assert_false(gta_personality_remove(NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+    assert_true(gta_personality_remove(framework_test_params->h_ctx, &errinfo));
+
+    /* gta_personality_deactivate */
+    assert_false(gta_personality_deactivate(NULL, NULL));
+    assert_false(gta_personality_deactivate(NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+    assert_true(gta_personality_deactivate(framework_test_params->h_ctx, &errinfo));
+
+    /* gta_personality_activate */
+    assert_false(gta_personality_activate(NULL, NULL));
+    assert_false(gta_personality_activate(NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+    assert_true(gta_personality_activate(framework_test_params->h_ctx, &errinfo));
 }
 
 static void
