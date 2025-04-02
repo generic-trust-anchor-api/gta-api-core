@@ -2895,8 +2895,8 @@ destroy_instance_provider_object(
         /* save ptr value before erasing the object */
         p_free = p_instance_provider_obj->p_inst_obj->params.os_functions.free;
 
-        gta_memset(p_instance_provider_obj, sizeof(struct framework_enum_object_t),
-                0, sizeof(struct framework_enum_object_t));
+        gta_memset(p_instance_provider_obj, sizeof(struct instance_provider_object_t),
+                0, sizeof(struct instance_provider_object_t));
         p_free(p_instance_provider_obj);
         b_ret = true;
     }
