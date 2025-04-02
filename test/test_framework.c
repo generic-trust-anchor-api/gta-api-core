@@ -1081,13 +1081,39 @@ test_gta_context_set_attribute(void ** state)
 static void
 test_gta_devicestate_transition(void ** state)
 {
-    /* todo */
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gta_access_policy_handle_t h_auth_recede = GTA_HANDLE_INVALID;
+
+    h_auth_recede = gta_access_policy_simple(framework_test_params->h_inst, GTA_ACCESS_DESCRIPTOR_TYPE_PHYSICAL_PRESENCE_TOKEN, &errinfo);
+    assert_non_null(h_auth_recede);
+
+    assert_false(gta_devicestate_transition(framework_test_params->h_inst, h_auth_recede, 0, NULL));
+
+    assert_false(gta_devicestate_transition(NULL, h_auth_recede, 0, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_false(gta_devicestate_transition(framework_test_params->h_inst, NULL, 0, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_ACCESS_POLICY);
+
+    assert_true(gta_devicestate_transition(framework_test_params->h_inst, h_auth_recede, 0, &errinfo));
 }
 
 static void
 test_gta_devicestate_recede(void ** state)
 {
-    /* todo */
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gta_access_token_t recede_token = { 0 };
+
+    assert_false(gta_devicestate_recede(framework_test_params->h_inst, recede_token, NULL));
+
+    assert_false(gta_devicestate_recede(NULL, recede_token, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_true(gta_devicestate_recede(framework_test_params->h_inst, NULL, &errinfo));
+
+    assert_true(gta_devicestate_recede(framework_test_params->h_inst, recede_token, &errinfo));
 }
 
 static void
@@ -1671,6 +1697,9 @@ int ts_framework(void)
         cmocka_unit_test(test_gta_context_get_provider_params),
         cmocka_unit_test(test_gta_context_get_params),
         cmocka_unit_test(test_gta_provider_get_params),
+        cmocka_unit_test(test_gta_context_set_attribute),
+        cmocka_unit_test(test_gta_devicestate_transition),
+        cmocka_unit_test(test_gta_devicestate_recede),
         cmocka_unit_test(test_gta_access_policy),
         cmocka_unit_test(test_gta_access_token_get_physical_presence),
         cmocka_unit_test(test_gta_access_token_get_issuing),
@@ -1682,9 +1711,6 @@ int ts_framework(void)
         cmocka_unit_test(test_gta_context_auth_get_challenge),
         cmocka_unit_test(test_gta_context_auth_set_random),
         cmocka_unit_test(test_gta_context_get_attribute),
-        cmocka_unit_test(test_gta_context_set_attribute),
-        cmocka_unit_test(test_gta_devicestate_transition),
-        cmocka_unit_test(test_gta_devicestate_recede),
         cmocka_unit_test(test_gta_devicestate_attestate),
         cmocka_unit_test(test_gta_personality_enumerate_application),
         cmocka_unit_test(test_gta_personality_enroll),
