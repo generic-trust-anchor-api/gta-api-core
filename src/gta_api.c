@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MPL-2.0 */
 /**********************************************************************
- * Copyright (c) 2024, Siemens AG
+ * Copyright (c) 2024-2025, Siemens AG
  **********************************************************************/
 
 #include <stdbool.h>
@@ -991,8 +991,8 @@ GTA_DEFINE_FUNCTION(bool, gta_access_token_get_basic,
         return false;
     }
 
-    /* Range check on usage */
-    if (usage > GTA_ACCESS_TOKEN_USAGE_RECEDE) {
+    /* Range check on usage. Only "use" and "admin" are allowed here. */
+    if (usage > GTA_ACCESS_TOKEN_USAGE_ADMIN) {
         *p_errinfo = GTA_ERROR_INVALID_PARAMETER;
         return false;
     }
@@ -1035,12 +1035,22 @@ GTA_DEFINE_FUNCTION(bool, gta_access_token_get_pers_derived,
 {
     context_object_t * p_ctx_obj = NULL_PTR;
 
-    if (true != basic_pointer_validation(p_errinfo, target_personality_name, p_pers_derived_access_token)) {
+    if (true != basic_pointer_validation(p_errinfo, p_pers_derived_access_token)) {
         return false;
     }
 
     /* Range check on usage */
     if (usage > GTA_ACCESS_TOKEN_USAGE_RECEDE) {
+        *p_errinfo = GTA_ERROR_INVALID_PARAMETER;
+        return false;
+    }
+
+    /*
+     * Advanced input validation for target_personality_name:
+     * In case of GTA_ACCESS_TOKEN_USAGE_RECEDE target_personality_name is
+     * ignored and can be NULL.
+     */
+    if ((GTA_ACCESS_TOKEN_USAGE_RECEDE != usage) && (NULL == target_personality_name)) {
         *p_errinfo = GTA_ERROR_INVALID_PARAMETER;
         return false;
     }
@@ -2201,12 +2211,20 @@ personality_deploy_create(
 
     /* Check handle */
     if (NULL != p_inst_obj) {
-        /* Check for potential name clashes */
-        if (NULL == find_personality(h_inst, personality_name, p_errinfo)) {
-            p_provider = select_provider_by_profile(h_inst, profile, p_errinfo);
+        /* Check auth handles */
+        if ((NULL != check_access_policy_handle(auth_admin, true, p_errinfo))
+            && (NULL != check_access_policy_handle(auth_use, true, p_errinfo))) {
+
+            /* Check for potential name clashes */
+            if (NULL == find_personality(h_inst, personality_name, p_errinfo)) {
+                p_provider = select_provider_by_profile(h_inst, profile, p_errinfo);
+            }
+            else {
+                *p_errinfo = GTA_ERROR_NAME_ALREADY_EXISTS;
+            }
         }
         else {
-            *p_errinfo = GTA_ERROR_NAME_ALREADY_EXISTS;
+            *p_errinfo = GTA_ERROR_ACCESS_POLICY;
         }
     }
     else {
