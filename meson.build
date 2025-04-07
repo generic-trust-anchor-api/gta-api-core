@@ -24,8 +24,8 @@ add_project_arguments(
   c_compiler.get_supported_arguments(
      '-Wextra',
      '-Wpedantic',
-     '-Wno-unused-function',  # TODO check if supressing this warning is a good idea
-     '-Wno-unused-parameter', # TODO check if supressing this warning is a good idea
+     '-Wno-unused-function',  # TODO check if suppressing this warning is a good idea
+     '-Wno-unused-parameter', # TODO check if suppressing this warning is a good idea
   ),
   language: 'c'
 )

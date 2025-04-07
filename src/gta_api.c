@@ -53,8 +53,8 @@
 
 /* Handle management
 
-   @todo Sharing handles accross multiple threads is not yet supported.
-   In case a handle aquired by thread A is used by thread B the result
+   @todo Sharing handles across multiple threads is not yet supported.
+   In case a handle acquired by thread A is used by thread B the result
    is undefined. */
 
 typedef enum {
@@ -611,9 +611,9 @@ GTA_DEFINE_FUNCTION(gta_instance_handle_t, gta_instance_init,
     /* get local read/write copy of params */
     memcpy(&instance_params, p_instance_params, sizeof(struct gta_instance_params_t));
 
-    /* sanity checks for syncronization functions */
+    /* sanity checks for synchronization functions */
     if (NULL != instance_params.global_mutex) {
-        /* all four syncronization functions need to be provided */
+        /* all four synchronization functions need to be provided */
         if ((NULL == instance_params.os_functions.mutex_create)
         || (NULL == instance_params.os_functions.mutex_destroy)
         || (NULL == instance_params.os_functions.mutex_lock)
@@ -624,7 +624,7 @@ GTA_DEFINE_FUNCTION(gta_instance_handle_t, gta_instance_init,
     }
     else
     {
-        /* redirect to dummy syncronization functions */
+        /* redirect to dummy synchronization functions */
         instance_params.os_functions.mutex_create = no_mutex_create;
         instance_params.os_functions.mutex_lock = no_mutex_lock;
         instance_params.os_functions.mutex_unlock = no_mutex_unlock;
@@ -1245,7 +1245,7 @@ GTA_DEFINE_FUNCTION(bool, gta_devicestate_transition,
                 free_handle(h_inst_provider, &errinfo);
             }
             else {
-                *p_errinfo = GTA_ERROR_HANDLES_EXAUSTED;
+                *p_errinfo = GTA_ERROR_HANDLES_EXHAUSTED;
             }
         }
         else {
@@ -1298,7 +1298,7 @@ GTA_DEFINE_FUNCTION(bool, gta_devicestate_recede,
             free_handle(h_inst_provider, &errinfo);
         }
         else {
-            *p_errinfo = GTA_ERROR_HANDLES_EXAUSTED;
+            *p_errinfo = GTA_ERROR_HANDLES_EXHAUSTED;
         }
     }
     else {
@@ -1685,7 +1685,7 @@ GTA_DEFINE_FUNCTION(void *, gta_secmem_checkptr,
 
 
 /*
- * Syncronization
+ * synchronization
  */
 
 GTA_DEFINE_FUNCTION(gta_mutex_t, gta_mutex_create,
@@ -2793,7 +2793,7 @@ alloc_handle(gta_handle_type_t type, void *params,
         } else {
             /* Recover initial g_handle_map.get value */
             g_handle_map.get = get;
-            *p_errinfo = GTA_ERROR_HANDLES_EXAUSTED;
+            *p_errinfo = GTA_ERROR_HANDLES_EXHAUSTED;
             handle = GTA_HANDLE_INVALID;
         }
 
@@ -3521,7 +3521,7 @@ err:
 
 
 /*
- * Dummy syncronization functions
+ * Dummy synchronization functions
  * These functions are used in case no multithreading is required.
  * Defined using GTA_DEFINE_FUNCTION to get function attributes
  * consistent with the external function pointers
