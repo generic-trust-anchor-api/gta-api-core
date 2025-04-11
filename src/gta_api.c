@@ -1177,6 +1177,32 @@ GTA_DEFINE_FUNCTION(bool, gta_context_auth_set_random,
     return false;
 }
 
+
+GTA_DEFINE_FUNCTION(bool, gta_context_get_attribute,
+(
+    gta_context_handle_t h_ctx,
+    const gta_context_attribute_type_t attrtype,
+    gtaio_ostream_t * p_attrvalue,
+    gta_errinfo_t * p_errinfo
+))
+{
+    const context_object_t * p_ctx_obj = NULL_PTR;
+
+    if (true != basic_pointer_validation(p_errinfo, attrtype, p_attrvalue)) {
+        return false;
+    }
+
+    p_ctx_obj = check_context_handle(h_ctx, p_errinfo);
+    if (NULL != p_ctx_obj) {
+        return GTA_PROVIDER_FWD_FUNCTION(p_ctx_obj->p_provider,
+            gta_context_get_attribute, (h_ctx, attrtype, p_attrvalue,
+                p_errinfo));
+    }
+    *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    return false;
+}
+
+
 GTA_DEFINE_FUNCTION(bool, gta_context_set_attribute,
 (
     gta_context_handle_t h_ctx,
