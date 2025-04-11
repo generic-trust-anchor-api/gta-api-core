@@ -1039,7 +1039,43 @@ test_gta_context_auth_set_random(void ** state)
 static void
 test_gta_context_get_attribute(void ** state)
 {
-    /* todo */
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gtaio_ostream_t attrvalue = { 0 };
+
+    assert_false(gta_context_get_attribute(framework_test_params->h_ctx,
+        NULL,
+        NULL,
+        NULL));
+
+    assert_false(gta_context_get_attribute(framework_test_params->h_ctx,
+        NULL,
+        NULL,
+        &errinfo));
+        assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_context_get_attribute(framework_test_params->h_ctx,
+        NULL,
+        &attrvalue,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_context_get_attribute(framework_test_params->h_ctx,
+        "attrtype",
+        NULL,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_context_get_attribute(NULL,
+        "attrtype",
+        &attrvalue,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_true(gta_context_get_attribute(framework_test_params->h_ctx,
+        "attrtype",
+        &attrvalue,
+        &errinfo));
 }
 
 static void
@@ -1703,6 +1739,7 @@ int ts_framework(void)
         cmocka_unit_test(test_gta_context_get_provider_params),
         cmocka_unit_test(test_gta_context_get_params),
         cmocka_unit_test(test_gta_provider_get_params),
+        cmocka_unit_test(test_gta_context_get_attribute),
         cmocka_unit_test(test_gta_context_set_attribute),
         cmocka_unit_test(test_gta_devicestate_transition),
         cmocka_unit_test(test_gta_devicestate_recede),
@@ -1716,7 +1753,6 @@ int ts_framework(void)
         cmocka_unit_test(test_gta_context_auth_set_access_token),
         cmocka_unit_test(test_gta_context_auth_get_challenge),
         cmocka_unit_test(test_gta_context_auth_set_random),
-        cmocka_unit_test(test_gta_context_get_attribute),
         cmocka_unit_test(test_gta_devicestate_attestate),
         cmocka_unit_test(test_gta_personality_enumerate_application),
         cmocka_unit_test(test_gta_personality_enroll),
