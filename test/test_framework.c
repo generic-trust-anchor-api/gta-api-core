@@ -1061,9 +1061,15 @@ test_gta_context_set_attribute(void ** state)
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
     assert_false(gta_context_set_attribute(framework_test_params->h_ctx,
-        "attrtype",
+        NULL,
         &attrvalue,
-        NULL));
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_context_set_attribute(framework_test_params->h_ctx,
+        "attrtype",
+        NULL,
+        &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
     assert_false(gta_context_set_attribute(NULL,
