@@ -2858,6 +2858,28 @@ GTA_DEFINE_FUNCTION(bool, gta_authenticate_data_detached, (
     return false;
 }
 
+GTA_DEFINE_FUNCTION(bool, gta_verify_data_detached, (
+    gta_context_handle_t h_ctx,
+    gtaio_istream_t * data,
+    gtaio_istream_t * seal,
+    gta_errinfo_t * p_errinfo
+))
+{
+    context_object_t * p_ctx_obj = NULL_PTR;
+
+    if (true != basic_pointer_validation(p_errinfo, data, seal)) {
+        return false;
+    }
+
+    p_ctx_obj = check_context_handle(h_ctx, p_errinfo);
+    if (p_ctx_obj) {
+        return GTA_PROVIDER_FWD_FUNCTION(p_ctx_obj->p_provider,
+           gta_verify_data_detached, (h_ctx, data, seal, p_errinfo));
+    }
+    *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    return false;
+}
+
 /*
  * Static module local functions
  */
