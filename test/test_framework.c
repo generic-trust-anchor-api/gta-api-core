@@ -1612,7 +1612,24 @@ test_gta_authenticate_data_detached(void ** state)
 static void
 test_gta_verify_data_detached(void ** state)
 {
-    /* todo */
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gtaio_istream_t data = { 0 };
+    gtaio_istream_t seal = { 0 };
+
+    assert_false(gta_verify_data_detached(framework_test_params->h_ctx,
+        &data, &seal, NULL));
+    assert_false(gta_verify_data_detached(NULL, &data, &seal, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+    assert_false(gta_verify_data_detached(framework_test_params->h_ctx,
+        NULL, &seal, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+    assert_false(gta_verify_data_detached(framework_test_params->h_ctx,
+        &data, NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_true(gta_verify_data_detached(framework_test_params->h_ctx,
+        &data, &seal, &errinfo));
 }
 
 static void
