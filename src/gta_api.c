@@ -861,7 +861,7 @@ GTA_DEFINE_FUNCTION(bool, gta_context_close,
     gta_errinfo_t * p_errinfo
     ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo)) {
         return false;
@@ -1037,7 +1037,7 @@ GTA_DEFINE_FUNCTION(bool, gta_access_token_get_pers_derived,
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, p_pers_derived_access_token)) {
         return false;
@@ -1121,7 +1121,7 @@ GTA_DEFINE_FUNCTION(bool, gta_context_auth_set_access_token,
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, access_token)) {
         return false;
@@ -1144,7 +1144,7 @@ GTA_DEFINE_FUNCTION(bool, gta_context_auth_get_challenge,
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, challenge)) {
         return false;
@@ -1166,7 +1166,7 @@ GTA_DEFINE_FUNCTION(bool, gta_context_auth_set_random,
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, random)) {
         return false;
@@ -1215,7 +1215,7 @@ GTA_DEFINE_FUNCTION(bool, gta_context_set_attribute,
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, attrtype, p_attrvalue)) {
         return false;
@@ -1345,7 +1345,7 @@ GTA_DEFINE_FUNCTION(void *, gta_context_get_provider_params,
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
     void * p_provider_params = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo)) {
@@ -1367,7 +1367,7 @@ GTA_DEFINE_FUNCTION(void *, gta_context_get_params,
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
     void * p_context_params = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo)) {
@@ -1739,7 +1739,7 @@ GTA_DEFINE_FUNCTION(void *, gta_secmem_checkptr,
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL;
+    const context_object_t * p_ctx_obj = NULL;
     struct secmem_block_t block = {0};
     block.p_next = p_check;
 
@@ -1771,7 +1771,7 @@ GTA_DEFINE_FUNCTION(gta_mutex_t, gta_mutex_create,
 ))
 {
     gta_errinfo_t errinfo; /* @todo: Pass through parameter list? */
-    context_object_t * p_ctx_obj = NULL;
+    const context_object_t * p_ctx_obj = NULL;
     gta_mutex_t p_mutex = NULL;
 
     p_ctx_obj = check_context_handle(h_ctx, &errinfo);
@@ -1791,7 +1791,7 @@ GTA_DEFINE_FUNCTION(bool, gta_mutex_destroy,
 ))
 {
     gta_errinfo_t errinfo; /* @todo: Pass through parameter list? */
-    context_object_t * p_ctx_obj = NULL;
+    const context_object_t * p_ctx_obj = NULL;
 
     p_ctx_obj = check_context_handle(h_ctx, &errinfo);
     if (p_ctx_obj) {
@@ -1809,7 +1809,7 @@ GTA_DEFINE_FUNCTION(bool, gta_mutex_lock,
 ))
 {
     gta_errinfo_t errinfo; /* @todo: Pass through parameter list? */
-    context_object_t * p_ctx_obj = NULL;
+    const context_object_t * p_ctx_obj = NULL;
 
     p_ctx_obj = check_context_handle(h_ctx, &errinfo);
     if (p_ctx_obj)
@@ -1828,7 +1828,7 @@ GTA_DEFINE_FUNCTION(bool, gta_mutex_unlock,
 ))
 {
     gta_errinfo_t errinfo; /* @todo: Pass through parameter list? */
-    context_object_t * p_ctx_obj = NULL;
+    const context_object_t * p_ctx_obj = NULL;
 
     p_ctx_obj = check_context_handle(h_ctx, &errinfo);
     if (p_ctx_obj)
@@ -2498,7 +2498,7 @@ GTA_DEFINE_FUNCTION(bool, gta_personality_enroll, (
             gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, p_personality_enrollment_info)) {
         return false;
@@ -2586,7 +2586,7 @@ GTA_DEFINE_FUNCTION(bool, gta_personality_add_trusted_attribute, (
         gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, attrtype, attrname, p_attrvalue)) {
         return false;
@@ -2611,7 +2611,7 @@ GTA_DEFINE_FUNCTION(bool, gta_personality_add_attribute, (
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, attrtype, attrname, p_attrvalue)) {
         return false;
@@ -2635,7 +2635,7 @@ GTA_DEFINE_FUNCTION(bool, gta_personality_get_attribute, (
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, attrname, p_attrvalue)) {
         return false;
@@ -2657,7 +2657,7 @@ GTA_DEFINE_FUNCTION(bool, gta_personality_remove_attribute, (
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, attrname)) {
         return false;
@@ -2678,7 +2678,7 @@ GTA_DEFINE_FUNCTION(bool, gta_personality_deactivate_attribute, (
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, attrname)) {
         return false;
@@ -2699,7 +2699,7 @@ GTA_DEFINE_FUNCTION(bool, gta_personality_activate_attribute, (
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, attrname)) {
         return false;
@@ -2775,7 +2775,7 @@ GTA_DEFINE_FUNCTION(bool, gta_seal_data,
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, data, protected_data)) {
         return false;
@@ -2798,7 +2798,7 @@ GTA_DEFINE_FUNCTION(bool, gta_unseal_data,
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, protected_data, data)) {
         return false;
@@ -2820,7 +2820,7 @@ GTA_DEFINE_FUNCTION(bool, gta_verify, (
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, claim)) {
         return false;
@@ -2842,7 +2842,7 @@ GTA_DEFINE_FUNCTION(bool, gta_authenticate_data_detached, (
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, data, seal)) {
         return false;
@@ -2865,7 +2865,7 @@ GTA_DEFINE_FUNCTION(bool, gta_verify_data_detached, (
     gta_errinfo_t * p_errinfo
 ))
 {
-    context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_ctx_obj = NULL_PTR;
 
     if (true != basic_pointer_validation(p_errinfo, data, seal)) {
         return false;
