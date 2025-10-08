@@ -30,7 +30,7 @@ GTA_DEFINE_FUNCTION(bool, gta_linux_mutex_destroy,
 {
     bool b_ret = false;
 
-    if ((GTA_HANDLE_INVALID != mutex) 
+    if ((GTA_HANDLE_INVALID != mutex)
         && (0 == pthread_mutex_destroy(mutex))){
 
         b_ret = true;
