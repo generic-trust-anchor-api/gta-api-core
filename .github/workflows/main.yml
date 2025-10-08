@@ -6,7 +6,7 @@
 #;**********************************************************************;
 
 name: CI
-on: 
+on:
   [workflow_dispatch, pull_request]
 
 jobs:
@@ -28,3 +28,12 @@ jobs:
       - name: Valgrind
         run: |
           ninja -C build gta_framework_memcheck
+
+  style-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout gta-api-core
+        uses: actions/checkout@v4
+      - name: Style check
+        run: ./.github/workflows/style-check.sh
+
