@@ -313,7 +313,7 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_identifier_enumerate,
         #define GTA_HANDLE_ENUM_1 ((gta_context_handle_t)-2)
         #define GTA_HANDLE_ENUM_2 ((gta_context_handle_t)-3)
         #define GTA_HANDLE_ENUM_3 ((gta_context_handle_t)-4)
-        
+
         if (GTA_HANDLE_INVALID == *ph_enum){
             *p_errinfo = GTA_ERROR_HANDLE_INVALID;
         } else if (GTA_HANDLE_ENUM_FIRST == *ph_enum) {
@@ -369,7 +369,7 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_enumerate,
         #define GTA_HANDLE_ENUM_1 ((gta_context_handle_t)-2)
         #define GTA_HANDLE_ENUM_2 ((gta_context_handle_t)-3)
         #define GTA_HANDLE_ENUM_3 ((gta_context_handle_t)-4)
-        
+
         if (GTA_HANDLE_INVALID == *ph_enum){
             *p_errinfo = GTA_ERROR_HANDLE_INVALID;
         } else if (GTA_HANDLE_ENUM_FIRST == *ph_enum) {

@@ -758,7 +758,7 @@ test_gta_personality(void ** state)
     gtaio_ostream_t personality_name = { 0 };
     gta_access_policy_handle_t h_auth = gta_access_policy_simple(framework_test_params->h_inst, GTA_ACCESS_DESCRIPTOR_TYPE_INITIAL, &errinfo);
     assert_non_null(h_auth);
-    
+
 
     /* gta_personality_create */
     assert_false(gta_personality_create(framework_test_params->h_inst, NULL,
@@ -877,7 +877,7 @@ test_gta_provider_get_params(void ** state)
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
     /*
      * This function can only be called from a provider, because of the wrapped
-     * instance handle. We only do negative tests here. 
+     * instance handle. We only do negative tests here.
      *
     assert_non_null(gta_provider_get_params(framework_test_params->h_inst,
         &errinfo));
