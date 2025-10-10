@@ -781,9 +781,10 @@ GTA_DEFINE_FUNCTION(bool, gta_instance_final,
     return false;
 }
 
-static struct provider_list_item_t *
+static bool
 find_personality(gta_instance_handle_t h_inst,
     const gta_personality_name_t personality_name,
+    struct provider_list_item_t ** p_provider_list_item,
     gta_errinfo_t * p_errinfo);
 
 GTA_DEFINE_FUNCTION(gta_context_handle_t, gta_context_open,
@@ -799,9 +800,8 @@ GTA_DEFINE_FUNCTION(gta_context_handle_t, gta_context_open,
     gta_context_handle_t h_ctx = GTA_HANDLE_INVALID;
     context_object_t * p_ctx_obj = NULL_PTR;
 
-    struct provider_list_item_t * p_provider_list_item;
-    struct profile_list_item_t * p_profile_list_item;
-    gta_errinfo_t errinfo = GTA_ERROR_INTERNAL_ERROR;
+    struct provider_list_item_t * p_provider_list_item = NULL;
+    struct profile_list_item_t * p_profile_list_item = NULL;
 
     p_inst_obj = check_instance_handle(h_inst, p_errinfo);
 
@@ -809,42 +809,42 @@ GTA_DEFINE_FUNCTION(gta_context_handle_t, gta_context_open,
         /* Check personality_name and profile */
         if ((NULL != personality_name) && (NULL != profile)) {
             /* Find provider holding the personality in question */
-            p_provider_list_item = find_personality(h_inst, personality_name,
-                &errinfo);
-            if (NULL != p_provider_list_item) {
-                /* Check whether the profile in question is supported by
-                 * provider */
-                p_profile_list_item = list_find(
-                    (struct list_t *)(p_inst_obj->p_profile_list),
-                    profile, profile_name_cmp);
-                if ((NULL != p_profile_list_item) && (p_provider_list_item == p_profile_list_item->p_provider)) {
-                    h_prectx = alloc_handle(GTA_HANDLE_TYPE_CONTEXT, p_inst_obj,
-                        (void **)(&p_ctx_obj), p_errinfo);
-                    p_ctx_obj->p_provider = p_provider_list_item;
-                    if (NULL != p_provider_list_item->function_list->pf_gta_provider_context_open) {
-                        if (p_provider_list_item->function_list->pf_gta_provider_context_open(h_prectx,
-                            personality_name, profile, &(p_ctx_obj->p_context_params), p_errinfo)) {
-                            h_ctx = h_prectx;
+            if (find_personality(h_inst, personality_name, &p_provider_list_item, p_errinfo)) {
+                if (NULL != p_provider_list_item) {
+                    /* Check whether the profile in question is supported by
+                    * provider */
+                    p_profile_list_item = list_find(
+                        (struct list_t *)(p_inst_obj->p_profile_list),
+                        profile, profile_name_cmp);
+                    if ((NULL != p_profile_list_item) && (p_provider_list_item == p_profile_list_item->p_provider)) {
+                        h_prectx = alloc_handle(GTA_HANDLE_TYPE_CONTEXT, p_inst_obj,
+                            (void **)(&p_ctx_obj), p_errinfo);
+                        p_ctx_obj->p_provider = p_provider_list_item;
+                        if (NULL != p_provider_list_item->function_list->pf_gta_provider_context_open) {
+                            if (p_provider_list_item->function_list->pf_gta_provider_context_open(h_prectx,
+                                personality_name, profile, &(p_ctx_obj->p_context_params), p_errinfo)) {
+                                h_ctx = h_prectx;
+                            }
+                            else {
+                                /* tear down preliminary context */
+                                gta_errinfo_t err;
+                                /* error returned fromfree_handle must not hide
+                                * error returned by context_open .*/
+                                free_handle(h_prectx, &err);
+                            }
                         }
                         else {
-                            /* tear down preliminary context */
-                            gta_errinfo_t err;
-                            /* error returned fromfree_handle must not hide
-                             * error returned by context_open .*/
-                            free_handle(h_prectx, &err);
+                            *p_errinfo = GTA_ERROR_PROVIDER_INVALID;
                         }
                     }
                     else {
-                        *p_errinfo = GTA_ERROR_PROVIDER_INVALID;
+                        *p_errinfo = GTA_ERROR_PROFILE_UNSUPPORTED;
                     }
                 }
                 else {
-                    *p_errinfo = GTA_ERROR_PROFILE_UNSUPPORTED;
+                    /* todo(thomas.zeschg): error code? */
+                    *p_errinfo = GTA_ERROR_INVALID_PARAMETER;
                 }
-            }
-            else {
-                /* todo(thomas.zeschg): error code? */
-                *p_errinfo = GTA_ERROR_INVALID_PARAMETER;
             }
         }
         else {
@@ -2399,11 +2399,14 @@ personality_deploy_create(
             && (NULL != check_access_policy_handle(auth_use, true, p_errinfo))) {
 
             /* Check for potential name clashes */
-            if (NULL == find_personality(h_inst, personality_name, p_errinfo)) {
-                p_provider = select_provider_by_profile(h_inst, profile, p_errinfo);
-            }
-            else {
-                *p_errinfo = GTA_ERROR_NAME_ALREADY_EXISTS;
+            struct provider_list_item_t * p_provider_list_item = NULL;
+            if (find_personality(h_inst, personality_name, &p_provider_list_item, p_errinfo)) {
+                if (NULL == p_provider_list_item) {
+                    p_provider = select_provider_by_profile(h_inst, profile, p_errinfo);
+                }
+                else {
+                    *p_errinfo = GTA_ERROR_NAME_ALREADY_EXISTS;
+                }
             }
         }
         else {
@@ -2726,7 +2729,7 @@ GTA_DEFINE_FUNCTION(bool, gta_personality_attributes_enumerate, (
     instance_object_t * p_inst_obj = NULL;
     struct instance_provider_object_t * p_instance_provider_obj = NULL_PTR;
     gta_instance_handle_t h_inst_provider = NULL;
-    struct provider_list_item_t * p_provider_list_item;
+    struct provider_list_item_t * p_provider_list_item = NULL;
     gta_errinfo_t errinfo = GTA_ERROR_INTERNAL_ERROR;
     bool ret = false;
 
@@ -2738,9 +2741,9 @@ GTA_DEFINE_FUNCTION(bool, gta_personality_attributes_enumerate, (
 
     if (NULL != p_inst_obj) {
         /* Find provider holding the personality in question */
-        p_provider_list_item = find_personality(h_inst, personality_name,
-            &errinfo);
-        if (NULL != p_provider_list_item) {
+        if ((find_personality(h_inst, personality_name,
+            &p_provider_list_item, &errinfo)) && (NULL != p_provider_list_item)) {
+
             h_inst_provider = alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER,
                 p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
             if (GTA_HANDLE_INVALID != h_inst_provider) {
@@ -3817,16 +3820,19 @@ static void ostream_to_buf_init
     memset(buf, 0x00, buf_size);
 }
 
-/* Auxiliary function to search a personality in the currently registered
- * providers. Returns p_provider_list_item if found, otherwise NULL */
-static struct provider_list_item_t *
+/*
+ * Auxiliary function to search a personality in the currently registered
+ * providers. Returns true if no error occurs, otherwise false. The
+ * parameter p_provider_list_item contains the personality in case it has
+ * been found, otherwise NULL.
+ */
+static bool
 find_personality(gta_instance_handle_t h_inst,
     const gta_personality_name_t personality_name,
+    struct provider_list_item_t ** p_provider_list_item,
     gta_errinfo_t * p_errinfo)
 {
     struct framework_enum_object_t * p_framework_enum_obj = NULL_PTR;
-    struct provider_list_item_t * p_provider_list_item = NULL;
-
     gtaio_ostream_t o_idtype = { 0 };
     o_idtype.write = (gtaio_stream_write_t)ostream_null_write;
     o_idtype.finish = (gtaio_stream_finish_t)ostream_finish;
@@ -3836,6 +3842,7 @@ find_personality(gta_instance_handle_t h_inst,
     bool b_idloop = true;
     bool b_persloop = true;
     gta_enum_handle_t h_idenum = GTA_HANDLE_ENUM_FIRST;
+    bool b_ret = true;
 
     /* loop over all identifier */
     while (b_idloop) {
@@ -3858,11 +3865,13 @@ find_personality(gta_instance_handle_t h_inst,
                         p_framework_enum_obj = check_framework_enum_handle(
                             h_persenum, p_errinfo);
                         if (NULL != p_framework_enum_obj) {
-                            p_provider_list_item = p_framework_enum_obj->p_provider;
+                            *p_provider_list_item = p_framework_enum_obj->p_provider;
                         }
                         else {
                             /* todo(thomas.zeschg): how to handle an error
                              * here? */
+                            p_provider_list_item = NULL;
+                            b_ret = false;
                         }
 
                         /* Even if we found the personality, we loop until the
@@ -3874,6 +3883,8 @@ find_personality(gta_instance_handle_t h_inst,
                     if (GTA_ERROR_ENUM_NO_MORE_ITEMS != errinfo) {
                         /* Error in enumeration */
                         *p_errinfo = errinfo;
+                        p_provider_list_item = NULL;
+                        b_ret = false;
                     }
                 }
             }
@@ -3883,10 +3894,12 @@ find_personality(gta_instance_handle_t h_inst,
             if (GTA_ERROR_ENUM_NO_MORE_ITEMS != errinfo) {
                 /* Error in enumeration */
                 *p_errinfo = errinfo;
+                p_provider_list_item = NULL;
+                b_ret = false;
             }
         }
     }
-    return p_provider_list_item;
+    return b_ret;
 }
 
 /*
