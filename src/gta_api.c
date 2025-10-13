@@ -2763,9 +2763,6 @@ GTA_DEFINE_FUNCTION(bool, gta_personality_attributes_enumerate, (
             *p_errinfo = GTA_ERROR_ITEM_NOT_FOUND;
         }
     }
-    else {
-        *p_errinfo = GTA_ERROR_INVALID_PARAMETER;
-    }
     return ret;
 }
 
