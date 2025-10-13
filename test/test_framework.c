@@ -1091,7 +1091,21 @@ test_gta_context_auth_get_challenge(void ** state)
 static void
 test_gta_context_auth_set_random(void ** state)
 {
-    /* todo */
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gtaio_istream_t random = { 0 };
+
+    assert_false(gta_context_auth_set_random(NULL, NULL, NULL));
+
+    assert_false(gta_context_auth_set_random(NULL, &random, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_false(gta_context_auth_set_random(framework_test_params->h_ctx, NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    errinfo = 0;
+    assert_true(gta_context_auth_set_random(framework_test_params->h_ctx, &random, &errinfo));
+    assert_int_equal(errinfo, 0);
 }
 
 static void
