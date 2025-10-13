@@ -409,13 +409,26 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_enumerate_applicatio
     gta_errinfo_t * p_errinfo
     ))
 {
-    bool ret = false;
+    bool b_ret = false;
 
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
+    /* hardcoded behaviour for framework tests */
+    #define GTA_HANDLE_ENUM_1 ((gta_context_handle_t)-2)
+    #define GTA_HANDLE_ENUM_2 ((gta_context_handle_t)-3)
 
-    /* ... */
+    if (GTA_HANDLE_ENUM_FIRST == *ph_enum) {
+        /* We don't write the output in the framework tests */
+        *ph_enum = GTA_HANDLE_ENUM_1;
+        b_ret = true;
+    } else if (GTA_HANDLE_ENUM_1 == *ph_enum) {
+        /* We don't write the output in the framework tests */
+        *ph_enum = GTA_HANDLE_ENUM_2;
+        b_ret = true;
+    } else if (GTA_HANDLE_ENUM_2 == *ph_enum) {
+        *ph_enum = GTA_HANDLE_INVALID;
+        *p_errinfo = GTA_ERROR_ENUM_NO_MORE_ITEMS;
+    }
 
-    return ret;
+    return b_ret;
 }
 
 

@@ -1214,6 +1214,7 @@ test_gta_personality_enumerate_application(void ** state)
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
     gtaio_ostream_t personality_name = { 0 };
+    bool b_loop = true;
     gta_enum_handle_t h_enum = GTA_HANDLE_ENUM_FIRST;
 
     assert_false(gta_personality_enumerate_application(framework_test_params->h_inst,
@@ -1270,6 +1271,19 @@ test_gta_personality_enumerate_application(void ** state)
         &personality_name,
         &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    while(b_loop) {
+        if (!gta_personality_enumerate_application(framework_test_params->h_inst,
+            "application",
+            &h_enum,
+            1,
+            &personality_name,
+            &errinfo)) {
+
+            assert_int_equal(GTA_ERROR_ENUM_NO_MORE_ITEMS, errinfo);
+            b_loop = false;
+        }
+    }
 }
 
 static void
