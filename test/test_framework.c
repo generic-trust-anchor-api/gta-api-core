@@ -1071,7 +1071,21 @@ test_gta_context_auth_set_access_token(void ** state)
 static void
 test_gta_context_auth_get_challenge(void ** state)
 {
-    /* todo */
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gtaio_ostream_t challenge = { 0 };
+
+    assert_false(gta_context_auth_get_challenge(NULL, NULL, NULL));
+
+    assert_false(gta_context_auth_get_challenge(NULL, &challenge, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_false(gta_context_auth_get_challenge(framework_test_params->h_ctx, NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    errinfo = 0;
+    assert_true(gta_context_auth_get_challenge(framework_test_params->h_ctx, &challenge, &errinfo));
+    assert_int_equal(errinfo, 0);
 }
 
 static void
