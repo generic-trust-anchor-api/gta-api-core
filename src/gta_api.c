@@ -1451,6 +1451,7 @@ GTA_DEFINE_FUNCTION(
     struct access_token_descriptor_object_list_item_t * p_token_descriptor_object = NULL_PTR;
     gta_access_descriptor_handle_t h_token_descriptor = GTA_HANDLE_INVALID;
     gta_profile_name_t verification_profile_name_copy = NULL_PTR;
+    size_t verification_profile_name_length = 0;
 
     if (true != basic_pointer_validation(p_errinfo, personality_fingerprint, verification_profile_name)) {
         return false;
@@ -1459,11 +1460,17 @@ GTA_DEFINE_FUNCTION(
     p_access_policy_obj =
         (/* const cast */ struct access_policy_object_t *)check_access_policy_handle(h_access_policy, false, p_errinfo);
     if (p_access_policy_obj) {
-        verification_profile_name_copy =
-            p_access_policy_obj->p_inst_obj->params.os_functions.calloc(1, strlen(verification_profile_name) + 1);
-        if (NULL_PTR == verification_profile_name_copy) {
-            *p_errinfo = GTA_ERROR_MEMORY;
-            goto err;
+        verification_profile_name_length = strnlen(verification_profile_name, PROFILE_NAME_LENGTH_MAX);
+        if ((0 != verification_profile_name_length) && (PROFILE_NAME_LENGTH_MAX != verification_profile_name_length)) {
+            verification_profile_name_copy =
+                p_access_policy_obj->p_inst_obj->params.os_functions.calloc(1, verification_profile_name_length + 1);
+            if (NULL_PTR == verification_profile_name_copy) {
+                *p_errinfo = GTA_ERROR_MEMORY;
+                goto err;
+            }
+        } else {
+            *p_errinfo = GTA_ERROR_INVALID_PARAMETER;
+            return false;
         }
 
         /* Allocate access token descriptor.
@@ -1484,7 +1491,7 @@ GTA_DEFINE_FUNCTION(
         memcpy(
             p_token_descriptor_object->pers_derived.profile_name,
             verification_profile_name,
-            strlen(verification_profile_name));
+            verification_profile_name_length);
         memcpy(
             p_token_descriptor_object->pers_derived.pers_fingerprint,
             personality_fingerprint,
