@@ -25,6 +25,7 @@ extern "C"
 /*---------------------------------------------------------------------*/
 
 #include <stdbool.h>
+#include <stddef.h>
 
 struct list_t {
     void * p_next;  /* pointer to the next list_t on the list;
