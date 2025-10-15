@@ -25,6 +25,7 @@
 #endif /* LINUX */
 
 #include <gta_api.h>
+#include <gta_list.h>
 #include <gta_memset.h>
 
 extern const struct gta_function_list_t * unittest_provider_init(
@@ -1553,6 +1554,41 @@ static void test_gta_context_open_wo_provider(void ** state)
     assert_null(framework_test_params->h_ctx);
 }
 
+static void test_gta_list(void ** state)
+{
+    /* Define a list item */
+    struct test_list_item_t {
+        struct test_list_item_t * p_next;
+    };
+
+    /* Setup an empty list */
+    struct test_list_item_t * test_list = NULL;
+
+    /* Declare a few list items */
+    struct test_list_item_t test_list_item_1 = {0};
+    struct test_list_item_t test_list_item_2 = {0};
+    struct test_list_item_t test_list_item_3 = {0};
+
+    assert_int_equal(0, list_cnt((struct list_t *)test_list));
+    list_append_front((struct list_t **)&test_list, &test_list_item_1);
+    list_append_front((struct list_t **)&test_list, &test_list_item_2);
+    list_append((struct list_t **)&test_list, &test_list_item_3);
+
+    assert_ptr_equal(&test_list_item_2, list_get((struct list_t *)test_list, 1));
+    assert_ptr_equal(&test_list_item_1, list_get((struct list_t *)test_list, 2));
+    assert_ptr_equal(&test_list_item_3, list_get((struct list_t *)test_list, 3));
+    assert_null(list_get((struct list_t *)test_list, 4));
+    assert_null(list_get((struct list_t *)test_list, 5));
+    assert_int_equal(3, list_cnt((struct list_t *)test_list));
+
+    assert_ptr_equal(&test_list_item_2, list_remove_front((struct list_t **)&test_list));
+    assert_ptr_equal(&test_list_item_1, list_remove_front((struct list_t **)&test_list));
+    assert_ptr_equal(&test_list_item_3, list_remove_front((struct list_t **)&test_list));
+    assert_null(list_remove_front((struct list_t **)&test_list));
+
+    list_append((struct list_t **)&test_list, &test_list_item_1);
+}
+
 int ts_framework(void)
 {
     const struct CMUnitTest tests_framework[] = {
@@ -1627,10 +1663,20 @@ int framework_exceptions(void)
     return cmocka_run_group_tests(tests_framework_exceptions, init_suite_framework_exceptions, clean_suite_framework);
 }
 
+int framework_utils(void)
+{
+    const struct CMUnitTest tests_framework_utils[] = {
+        cmocka_unit_test(test_gta_list),
+    };
+
+    return cmocka_run_group_tests(tests_framework_utils, NULL, NULL);
+}
+
 int main(void)
 {
     int result = 0;
     result |= ts_framework();
     result |= framework_exceptions();
+    result |= framework_utils();
     return result;
 }
