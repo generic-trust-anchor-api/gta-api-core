@@ -35,9 +35,8 @@ void * list_remove_front(struct list_t ** pp_head)
     struct list_t * p_front = NULL;
 
     if (*pp_head) {
-        p_front = ((struct list_t *)*pp_head);
-        if (p_front)
-            *pp_head = p_front->p_next;
+        p_front = *pp_head;
+        *pp_head = p_front->p_next;
     }
 
     return p_front;
