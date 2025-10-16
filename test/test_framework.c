@@ -1071,13 +1071,41 @@ test_gta_context_auth_set_access_token(void ** state)
 static void
 test_gta_context_auth_get_challenge(void ** state)
 {
-    /* todo */
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gtaio_ostream_t challenge = { 0 };
+
+    assert_false(gta_context_auth_get_challenge(NULL, NULL, NULL));
+
+    assert_false(gta_context_auth_get_challenge(NULL, &challenge, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_false(gta_context_auth_get_challenge(framework_test_params->h_ctx, NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    errinfo = 0;
+    assert_true(gta_context_auth_get_challenge(framework_test_params->h_ctx, &challenge, &errinfo));
+    assert_int_equal(errinfo, 0);
 }
 
 static void
 test_gta_context_auth_set_random(void ** state)
 {
-    /* todo */
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gtaio_istream_t random = { 0 };
+
+    assert_false(gta_context_auth_set_random(NULL, NULL, NULL));
+
+    assert_false(gta_context_auth_set_random(NULL, &random, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_false(gta_context_auth_set_random(framework_test_params->h_ctx, NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    errinfo = 0;
+    assert_true(gta_context_auth_set_random(framework_test_params->h_ctx, &random, &errinfo));
+    assert_int_equal(errinfo, 0);
 }
 
 static void
@@ -1214,6 +1242,7 @@ test_gta_personality_enumerate_application(void ** state)
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
     gtaio_ostream_t personality_name = { 0 };
+    bool b_loop = true;
     gta_enum_handle_t h_enum = GTA_HANDLE_ENUM_FIRST;
 
     assert_false(gta_personality_enumerate_application(framework_test_params->h_inst,
@@ -1270,6 +1299,19 @@ test_gta_personality_enumerate_application(void ** state)
         &personality_name,
         &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    while(b_loop) {
+        if (!gta_personality_enumerate_application(framework_test_params->h_inst,
+            "application",
+            &h_enum,
+            1,
+            &personality_name,
+            &errinfo)) {
+
+            assert_int_equal(GTA_ERROR_ENUM_NO_MORE_ITEMS, errinfo);
+            b_loop = false;
+        }
+    }
 }
 
 static void
@@ -1499,6 +1541,93 @@ test_gta_personality_activate_attribute(void ** state)
     assert_true(gta_personality_activate_attribute(framework_test_params->h_ctx,
         "attrname",
         &errinfo));
+}
+
+static void
+test_gta_personality_attributes_enumerate(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gtaio_ostream_t attribute_type = { 0 };
+    gtaio_ostream_t attribute_name = { 0 };
+    bool b_loop = true;
+    gta_enum_handle_t h_enum = GTA_HANDLE_ENUM_FIRST;
+
+    assert_false(gta_personality_attributes_enumerate(framework_test_params->h_inst,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL));
+
+    assert_false(gta_personality_attributes_enumerate(framework_test_params->h_inst,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_personality_attributes_enumerate(NULL,
+        "personality",
+        &h_enum,
+        &attribute_type,
+        &attribute_name,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_false(gta_personality_attributes_enumerate(framework_test_params->h_inst,
+        NULL,
+        &h_enum,
+        &attribute_type,
+        &attribute_name,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_personality_attributes_enumerate(framework_test_params->h_inst,
+        "personality",
+        NULL,
+        &attribute_type,
+        &attribute_name,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_personality_attributes_enumerate(framework_test_params->h_inst,
+        "personality",
+        &h_enum,
+        NULL,
+        &attribute_name,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_personality_attributes_enumerate(framework_test_params->h_inst,
+        "personality",
+        &h_enum,
+        &attribute_type,
+        NULL,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_personality_attributes_enumerate(framework_test_params->h_inst,
+        "personality",
+        &h_enum,
+        &attribute_type,
+        &attribute_name,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_ITEM_NOT_FOUND);
+
+    while(b_loop) {
+        if (!gta_personality_attributes_enumerate(framework_test_params->h_inst,
+            "personality1",
+            &h_enum,
+            &attribute_type,
+            &attribute_name,
+            &errinfo)) {
+
+            assert_int_equal(GTA_ERROR_ENUM_NO_MORE_ITEMS, errinfo);
+            b_loop = false;
+        }
+    }
 }
 
 static void
@@ -1828,6 +1957,7 @@ int ts_framework(void)
         cmocka_unit_test(test_gta_personality_remove_attribute),
         cmocka_unit_test(test_gta_personality_deactivate_attribute),
         cmocka_unit_test(test_gta_personality_activate_attribute),
+        cmocka_unit_test(test_gta_personality_attributes_enumerate),
         cmocka_unit_test(test_gta_seal_data),
         cmocka_unit_test(test_gta_unseal_data),
         cmocka_unit_test(test_gta_verify),
