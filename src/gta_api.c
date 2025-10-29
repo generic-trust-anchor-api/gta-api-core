@@ -846,13 +846,13 @@ GTA_DEFINE_FUNCTION(
         if (GTA_HANDLE_INVALID != h_inst_provider) {
             p_instance_provider_obj->h_inst = h_inst;
             p_instance_provider_obj->p_provider = p_provider_list_item;
-        }
 
-        b_ret = GTA_PROVIDER_FWD_FUNCTION(
-            p_provider_list_item,
-            gta_access_token_get_physical_presence,
-            (h_inst_provider, physical_presence_token, p_errinfo));
-        free_handle(h_inst_provider, &errinfo_tmp);
+            b_ret = GTA_PROVIDER_FWD_FUNCTION(
+                p_provider_list_item,
+                gta_access_token_get_physical_presence,
+                (h_inst_provider, physical_presence_token, p_errinfo));
+            free_handle(h_inst_provider, &errinfo_tmp);
+        }
     } else {
         *p_errinfo = GTA_ERROR_HANDLE_INVALID;
     }
@@ -887,11 +887,11 @@ GTA_DEFINE_FUNCTION(
         if (GTA_HANDLE_INVALID != h_inst_provider) {
             p_instance_provider_obj->h_inst = h_inst;
             p_instance_provider_obj->p_provider = p_provider_list_item;
-        }
 
-        b_ret = GTA_PROVIDER_FWD_FUNCTION(
-            p_provider_list_item, gta_access_token_get_issuing, (h_inst_provider, granting_token, p_errinfo));
-        free_handle(h_inst_provider, &errinfo_tmp);
+            b_ret = GTA_PROVIDER_FWD_FUNCTION(
+                p_provider_list_item, gta_access_token_get_issuing, (h_inst_provider, granting_token, p_errinfo));
+            free_handle(h_inst_provider, &errinfo_tmp);
+        }
     } else {
         *p_errinfo = GTA_ERROR_HANDLE_INVALID;
     }
@@ -937,13 +937,13 @@ GTA_DEFINE_FUNCTION(
         if (GTA_HANDLE_INVALID != h_inst_provider) {
             p_instance_provider_obj->h_inst = h_inst;
             p_instance_provider_obj->p_provider = p_provider_list_item;
-        }
 
-        b_ret = GTA_PROVIDER_FWD_FUNCTION(
-            p_provider_list_item,
-            gta_access_token_get_basic,
-            (h_inst_provider, granting_token, personality_name, usage, basic_access_token, p_errinfo));
-        free_handle(h_inst_provider, &errinfo_tmp);
+            b_ret = GTA_PROVIDER_FWD_FUNCTION(
+                p_provider_list_item,
+                gta_access_token_get_basic,
+                (h_inst_provider, granting_token, personality_name, usage, basic_access_token, p_errinfo));
+            free_handle(h_inst_provider, &errinfo_tmp);
+        }
     } else {
         *p_errinfo = GTA_ERROR_HANDLE_INVALID;
     }
@@ -1020,11 +1020,11 @@ GTA_DEFINE_FUNCTION(
         if (GTA_HANDLE_INVALID != h_inst_provider) {
             p_instance_provider_obj->h_inst = h_inst;
             p_instance_provider_obj->p_provider = p_provider_list_item;
-        }
 
-        b_ret = GTA_PROVIDER_FWD_FUNCTION(
-            p_provider_list_item, gta_access_token_revoke, (h_inst_provider, access_token_tbr, p_errinfo));
-        free_handle(h_inst_provider, &errinfo_tmp);
+            b_ret = GTA_PROVIDER_FWD_FUNCTION(
+                p_provider_list_item, gta_access_token_revoke, (h_inst_provider, access_token_tbr, p_errinfo));
+            free_handle(h_inst_provider, &errinfo_tmp);
+        }
     } else {
         *p_errinfo = GTA_ERROR_HANDLE_INVALID;
     }
@@ -1178,8 +1178,6 @@ GTA_DEFINE_FUNCTION(
                     (h_inst_provider, h_auth_recede, owner_lock_count, p_errinfo));
 
                 free_handle(h_inst_provider, &errinfo);
-            } else {
-                *p_errinfo = GTA_ERROR_HANDLES_EXAUSTED;
             }
         } else {
             *p_errinfo = GTA_ERROR_ACCESS_POLICY;
@@ -1224,8 +1222,6 @@ GTA_DEFINE_FUNCTION(
                 p_provider_list_item, gta_devicestate_recede, (h_inst_provider, access_token, p_errinfo));
 
             free_handle(h_inst_provider, &errinfo);
-        } else {
-            *p_errinfo = GTA_ERROR_HANDLES_EXAUSTED;
         }
     } else {
         *p_errinfo = GTA_ERROR_HANDLE_INVALID;
@@ -1894,7 +1890,6 @@ GTA_DEFINE_FUNCTION(
     h_inst_provider =
         alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER, p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
     if (GTA_HANDLE_INVALID == h_inst_provider) {
-        *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
         return false;
     }
     p_instance_provider_obj->h_inst = h_inst;
@@ -1999,7 +1994,6 @@ GTA_DEFINE_FUNCTION(
     h_inst_provider =
         alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER, p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
     if (GTA_HANDLE_INVALID == h_inst_provider) {
-        *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
         return false;
     }
     p_instance_provider_obj->h_inst = h_inst;
@@ -2095,7 +2089,6 @@ GTA_DEFINE_FUNCTION(
     h_inst_provider =
         alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER, p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
     if (GTA_HANDLE_INVALID == h_inst_provider) {
-        *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
         return false;
     }
     p_instance_provider_obj->h_inst = h_inst;
@@ -2555,8 +2548,6 @@ GTA_DEFINE_FUNCTION(
                     gta_personality_attributes_enumerate,
                     (h_inst_provider, personality_name, ph_enum, attribute_type, attribute_name, p_errinfo));
                 free_handle(h_inst_provider, &errinfo);
-            } else {
-                *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
             }
         } else {
             *p_errinfo = GTA_ERROR_ITEM_NOT_FOUND;
