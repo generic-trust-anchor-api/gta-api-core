@@ -1,9 +1,6 @@
-#;**********************************************************************;
+# SPDX-FileCopyrightText: Copyright 2024 Siemens
+#
 # SPDX-License-Identifier: Apache-2.0
-#
-# Copyright (c) 2024, Siemens AG
-#
-#;**********************************************************************;
 
 # Files depend on host OS
 if target_os == 'linux'
