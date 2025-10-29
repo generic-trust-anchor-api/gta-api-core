@@ -7,19 +7,18 @@
 #define GTA_WINDOWS_H
 
 #if _MSC_VER > 1000
- /* microsoft */
- /* Specifies that the file will be included (opened) only
-    once by the compiler in a build. This can reduce build
-    times as the compiler will not open and read the file
-    after the first #include of the module. */
+/* microsoft */
+/* Specifies that the file will be included (opened) only
+   once by the compiler in a build. This can reduce build
+   times as the compiler will not open and read the file
+   after the first #include of the module. */
 #pragma once
 #endif
 
 #if defined(__cplusplus)
-    /* *INDENT-OFF* */
-extern "C"
-{
-    /* *INDENT-ON* */
+/* *INDENT-OFF* */
+extern "C" {
+/* *INDENT-ON* */
 #endif
 
 /*---------------------------------------------------------------------*/

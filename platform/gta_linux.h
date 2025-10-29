@@ -7,10 +7,9 @@
 #define GTA_LINUX_H
 
 #if defined(__cplusplus)
-    /* *INDENT-OFF* */
-extern "C"
-{
-    /* *INDENT-ON* */
+/* *INDENT-OFF* */
+extern "C" {
+/* *INDENT-ON* */
 #endif
 
 /*---------------------------------------------------------------------*/

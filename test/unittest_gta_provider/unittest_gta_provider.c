@@ -3,13 +3,12 @@
  * Copyright (c) 2024-2025, Siemens AG
  **********************************************************************/
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
-#include <stdio.h>
-
 #include <gta_api.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 static const struct gta_function_list_t g_my_function_list;
 
@@ -18,14 +17,12 @@ struct unittest_provider_params_t {
     void * p_some_provider_param;
 };
 
-
 /* provider local context specific data */
 struct unittest_provider_context_params_t {
     void * p_some_context_param;
 };
 
-void
-unittest_provider_free_params(void * p_params)
+void unittest_provider_free_params(void * p_params)
 {
     /* p_params have been allocated using gta_secmem_calloc() an
        are released automatically.
@@ -34,15 +31,15 @@ unittest_provider_free_params(void * p_params)
 }
 
 GTA_DECLARE_FUNCTION(const struct gta_function_list_t *, unittest_provider_init, ());
-GTA_DEFINE_FUNCTION(const struct gta_function_list_t *, unittest_provider_init,
-(
-    gta_context_handle_t h_ctx,
-    gtaio_istream_t * provider_init_config,
-    gtaio_ostream_t * logging,
-    void ** pp_params,
-    void (** ppf_free_params)(void * p_params),
-    gta_errinfo_t * p_errinfo
-))
+GTA_DEFINE_FUNCTION(
+    const struct gta_function_list_t *,
+    unittest_provider_init,
+    (gta_context_handle_t h_ctx,
+     gtaio_istream_t * provider_init_config,
+     gtaio_ostream_t * logging,
+     void ** pp_params,
+     void (**ppf_free_params)(void * p_params),
+     gta_errinfo_t * p_errinfo))
 {
     struct unittest_provider_params_t * p_provider_params = NULL;
     p_provider_params = gta_secmem_calloc(h_ctx, 1, 1, p_errinfo);
@@ -52,8 +49,7 @@ GTA_DEFINE_FUNCTION(const struct gta_function_list_t *, unittest_provider_init,
     *ppf_free_params = unittest_provider_free_params;
 
 #if 1 /* internal test */
-    if (gta_context_get_provider_params(h_ctx, p_errinfo) != p_provider_params)
-    {
+    if (gta_context_get_provider_params(h_ctx, p_errinfo) != p_provider_params) {
         *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
         return NULL;
     }
@@ -62,131 +58,109 @@ GTA_DEFINE_FUNCTION(const struct gta_function_list_t *, unittest_provider_init,
     return &g_my_function_list;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_access_token_get_physical_presence,
-(
-    gta_instance_handle_t h_inst,
-    gta_access_token_t physical_presence_token,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_access_token_get_physical_presence,
+    (gta_instance_handle_t h_inst, gta_access_token_t physical_presence_token, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_access_token_get_issuing,
-(
-    gta_instance_handle_t h_inst,
-    gta_access_token_t granting_token,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_access_token_get_issuing,
+    (gta_instance_handle_t h_inst, gta_access_token_t granting_token, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_access_token_get_basic,
-(
-    gta_instance_handle_t h_inst,
-    const gta_access_token_t granting_token,
-    const gta_personality_name_t personality_name,
-    gta_access_token_usage_t usage,
-    gta_access_token_t basic_access_token,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_access_token_get_basic,
+    (gta_instance_handle_t h_inst,
+     const gta_access_token_t granting_token,
+     const gta_personality_name_t personality_name,
+     gta_access_token_usage_t usage,
+     gta_access_token_t basic_access_token,
+     gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_access_token_get_pers_derived,
-(
-    gta_context_handle_t h_ctx,
-    const gta_personality_name_t target_personality_name,
-    gta_access_token_usage_t usage,
-    gta_access_token_t * p_pers_derived_access_token,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_access_token_get_pers_derived,
+    (gta_context_handle_t h_ctx,
+     const gta_personality_name_t target_personality_name,
+     gta_access_token_usage_t usage,
+     gta_access_token_t * p_pers_derived_access_token,
+     gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_access_token_revoke,
-(
-    gta_instance_handle_t h_inst,
-    gta_access_token_t access_token_tbr,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_access_token_revoke,
+    (gta_instance_handle_t h_inst, gta_access_token_t access_token_tbr, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_context_auth_set_access_token,
-(
-    gta_context_handle_t h_ctx,
-    const gta_access_token_t access_token,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_context_auth_set_access_token,
+    (gta_context_handle_t h_ctx, const gta_access_token_t access_token, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_context_auth_get_challenge,
-(
-    gta_context_handle_t h_ctx,
-    gtaio_ostream_t * challenge,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_context_auth_get_challenge,
+    (gta_context_handle_t h_ctx, gtaio_ostream_t * challenge, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_context_auth_set_random,
-(
-    gta_context_handle_t h_ctx,
-    gtaio_istream_t * random,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_context_auth_set_random,
+    (gta_context_handle_t h_ctx, gtaio_istream_t * random, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_context_get_attribute,
-(
-    gta_context_handle_t h_ctx,
-    const gta_context_attribute_type_t attrtype,
-    gtaio_ostream_t * p_attrvalue,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_context_get_attribute,
+    (gta_context_handle_t h_ctx,
+     const gta_context_attribute_type_t attrtype,
+     gtaio_ostream_t * p_attrvalue,
+     gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_context_set_attribute,
-(
-    gta_context_handle_t h_ctx,
-    const gta_context_attribute_type_t attrtype,
-    gtaio_istream_t * p_attrvalue,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_context_set_attribute,
+    (gta_context_handle_t h_ctx,
+     const gta_context_attribute_type_t attrtype,
+     gtaio_istream_t * p_attrvalue,
+     gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_provider_context_open,
-(
-    gta_context_handle_t h_ctx,
-    const gta_personality_name_t personality,
-    const gta_profile_name_t profile,
-    void ** pp_params,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_provider_context_open,
+    (gta_context_handle_t h_ctx,
+     const gta_personality_name_t personality,
+     const gta_profile_name_t profile,
+     void ** pp_params,
+     gta_errinfo_t * p_errinfo))
 {
     bool ret = true;
 
@@ -198,8 +172,7 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_provider_context_open,
     }
 
 #if 1 /* internal test */
-    if (gta_context_get_params(h_ctx, p_errinfo) != p_context_params)
-    {
+    if (gta_context_get_params(h_ctx, p_errinfo) != p_context_params) {
         /* p_context_params is not cleaned up */
         *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
         return false;
@@ -211,12 +184,10 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_provider_context_open,
     return ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_provider_context_close,
-(
-    gta_context_handle_t h_ctx,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_provider_context_close,
+    (gta_context_handle_t h_ctx, gta_errinfo_t * p_errinfo))
 {
     bool ret = false;
 
@@ -227,37 +198,29 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_provider_context_close,
     return ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_devicestate_transition,
-(
-    gta_instance_handle_t h_inst,
-    gta_access_policy_handle_t h_auth_recede,
-    size_t owner_lock_count,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_devicestate_transition,
+    (gta_instance_handle_t h_inst,
+     gta_access_policy_handle_t h_auth_recede,
+     size_t owner_lock_count,
+     gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_devicestate_recede,
-(
-    gta_instance_handle_t h_inst,
-    gta_access_token_t access_token,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_devicestate_recede,
+    (gta_instance_handle_t h_inst, gta_access_token_t access_token, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_devicestate_attestate,
-(
-    gta_context_handle_t h_context,
-    gtaio_istream_t * nonce,
-    gtaio_ostream_t * attestation,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_devicestate_attestate,
+    (gta_context_handle_t h_context, gtaio_istream_t * nonce, gtaio_ostream_t * attestation, gta_errinfo_t * p_errinfo))
 {
     bool ret = false;
 
@@ -268,61 +231,51 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_devicestate_attestate,
     return ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_identifier_assign,
-(
-    gta_instance_handle_t h_inst,
-    const gta_identifier_type_t identifier_type,
-    const gta_identifier_value_t identifier_value,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_identifier_assign,
+    (gta_instance_handle_t h_inst,
+     const gta_identifier_type_t identifier_type,
+     const gta_identifier_value_t identifier_value,
+     gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_identifier_enumerate,
-(
-    gta_instance_handle_t h_inst,
-    gta_enum_handle_t * ph_enum,
-    gtaio_ostream_t * identifier_type,
-    gtaio_ostream_t * identifier_value,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_identifier_enumerate,
+    (gta_instance_handle_t h_inst,
+     gta_enum_handle_t * ph_enum,
+     gtaio_ostream_t * identifier_type,
+     gtaio_ostream_t * identifier_value,
+     gta_errinfo_t * p_errinfo))
 {
     bool b_ret = false;
 
     /* check parameters */
-    if ((NULL != ph_enum)
-        || (NULL == identifier_type)
-        || (NULL == identifier_value)) {
+    if ((NULL != ph_enum) || (NULL == identifier_type) || (NULL == identifier_value)) {
 
-        /* hardcoded behaviour for framework tests */
-        #define GTA_HANDLE_ENUM_1 ((gta_context_handle_t)-2)
-        #define GTA_HANDLE_ENUM_2 ((gta_context_handle_t)-3)
-        #define GTA_HANDLE_ENUM_3 ((gta_context_handle_t)-4)
-        
-        if (GTA_HANDLE_INVALID == *ph_enum){
+/* hardcoded behaviour for framework tests */
+#define GTA_HANDLE_ENUM_1 ((gta_context_handle_t) - 2)
+#define GTA_HANDLE_ENUM_2 ((gta_context_handle_t) - 3)
+#define GTA_HANDLE_ENUM_3 ((gta_context_handle_t) - 4)
+
+        if (GTA_HANDLE_INVALID == *ph_enum) {
             *p_errinfo = GTA_ERROR_HANDLE_INVALID;
         } else if (GTA_HANDLE_ENUM_FIRST == *ph_enum) {
-            identifier_type->write(identifier_type, "type1",
-                6, p_errinfo);
-            identifier_value->write(identifier_value, "identifier1",
-                12, p_errinfo);
+            identifier_type->write(identifier_type, "type1", 6, p_errinfo);
+            identifier_value->write(identifier_value, "identifier1", 12, p_errinfo);
             *ph_enum = GTA_HANDLE_ENUM_1;
             b_ret = true;
         } else if (GTA_HANDLE_ENUM_1 == *ph_enum) {
-            identifier_type->write(identifier_type, "type2",
-                6, p_errinfo);
-            identifier_value->write(identifier_value, "identifier2",
-                12, p_errinfo);
+            identifier_type->write(identifier_type, "type2", 6, p_errinfo);
+            identifier_value->write(identifier_value, "identifier2", 12, p_errinfo);
             *ph_enum = GTA_HANDLE_ENUM_2;
             b_ret = true;
         } else if (GTA_HANDLE_ENUM_2 == *ph_enum) {
-            identifier_type->write(identifier_type, "type3",
-                6, p_errinfo);
-            identifier_value->write(identifier_value, "identifier3",
-                12, p_errinfo);
+            identifier_type->write(identifier_type, "type3", 6, p_errinfo);
+            identifier_value->write(identifier_value, "identifier3", 12, p_errinfo);
             *ph_enum = GTA_HANDLE_ENUM_3;
             b_ret = true;
         } else if (GTA_HANDLE_ENUM_3 == *ph_enum) {
@@ -336,43 +289,38 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_identifier_enumerate,
     return b_ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_enumerate,
-(
-    gta_instance_handle_t h_inst,
-    const gta_identifier_value_t identifier_value,
-    gta_enum_handle_t * ph_enum,
-    gta_personality_enum_flags_t flags,
-    gtaio_ostream_t * personality_name,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_personality_enumerate,
+    (gta_instance_handle_t h_inst,
+     const gta_identifier_value_t identifier_value,
+     gta_enum_handle_t * ph_enum,
+     gta_personality_enum_flags_t flags,
+     gtaio_ostream_t * personality_name,
+     gta_errinfo_t * p_errinfo))
 {
     bool b_ret = false;
 
     /* check parameters */
-    if ((NULL != ph_enum)
-        || (NULL == personality_name)) {
+    if ((NULL != ph_enum) || (NULL == personality_name)) {
 
-        /* hardcoded behaviour for framework tests */
-        #define GTA_HANDLE_ENUM_1 ((gta_context_handle_t)-2)
-        #define GTA_HANDLE_ENUM_2 ((gta_context_handle_t)-3)
-        #define GTA_HANDLE_ENUM_3 ((gta_context_handle_t)-4)
-        
-        if (GTA_HANDLE_INVALID == *ph_enum){
+/* hardcoded behaviour for framework tests */
+#define GTA_HANDLE_ENUM_1 ((gta_context_handle_t) - 2)
+#define GTA_HANDLE_ENUM_2 ((gta_context_handle_t) - 3)
+#define GTA_HANDLE_ENUM_3 ((gta_context_handle_t) - 4)
+
+        if (GTA_HANDLE_INVALID == *ph_enum) {
             *p_errinfo = GTA_ERROR_HANDLE_INVALID;
         } else if (GTA_HANDLE_ENUM_FIRST == *ph_enum) {
-            personality_name->write(personality_name, "personality1",
-                13, p_errinfo);
+            personality_name->write(personality_name, "personality1", 13, p_errinfo);
             *ph_enum = GTA_HANDLE_ENUM_1;
             b_ret = true;
         } else if (GTA_HANDLE_ENUM_1 == *ph_enum) {
-            personality_name->write(personality_name, "personality2",
-                13, p_errinfo);
+            personality_name->write(personality_name, "personality2", 13, p_errinfo);
             *ph_enum = GTA_HANDLE_ENUM_2;
             b_ret = true;
         } else if (GTA_HANDLE_ENUM_2 == *ph_enum) {
-            personality_name->write(personality_name, "personality3",
-                13, p_errinfo);
+            personality_name->write(personality_name, "personality3", 13, p_errinfo);
             *ph_enum = GTA_HANDLE_ENUM_3;
             b_ret = true;
         } else if (GTA_HANDLE_ENUM_3 == *ph_enum) {
@@ -386,22 +334,21 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_enumerate,
     return b_ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_enumerate_application,
-(
-    gta_instance_handle_t h_inst,
-    const gta_application_name_t application_name,
-    gta_enum_handle_t * ph_enum,
-    gta_personality_enum_flags_t flags,
-    gtaio_ostream_t * personality_name,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_personality_enumerate_application,
+    (gta_instance_handle_t h_inst,
+     const gta_application_name_t application_name,
+     gta_enum_handle_t * ph_enum,
+     gta_personality_enum_flags_t flags,
+     gtaio_ostream_t * personality_name,
+     gta_errinfo_t * p_errinfo))
 {
     bool b_ret = false;
 
-    /* hardcoded behaviour for framework tests */
-    #define GTA_HANDLE_ENUM_1 ((gta_context_handle_t)-2)
-    #define GTA_HANDLE_ENUM_2 ((gta_context_handle_t)-3)
+/* hardcoded behaviour for framework tests */
+#define GTA_HANDLE_ENUM_1 ((gta_context_handle_t) - 2)
+#define GTA_HANDLE_ENUM_2 ((gta_context_handle_t) - 3)
 
     if (GTA_HANDLE_ENUM_FIRST == *ph_enum) {
         /* We don't write the output in the framework tests */
@@ -419,60 +366,54 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_enumerate_applicatio
     return b_ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_deploy,
-(
-    gta_instance_handle_t h_inst,
-    const gta_identifier_value_t identifier_value,
-    const gta_personality_name_t personality_name,
-    const gta_application_name_t application,
-    const gta_profile_name_t profile,
-    gtaio_istream_t * personality_content,
-    gta_access_policy_handle_t h_auth_use,
-    gta_access_policy_handle_t h_auth_admin,
-    struct gta_protection_properties_t requested_protection_properties,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_personality_deploy,
+    (gta_instance_handle_t h_inst,
+     const gta_identifier_value_t identifier_value,
+     const gta_personality_name_t personality_name,
+     const gta_application_name_t application,
+     const gta_profile_name_t profile,
+     gtaio_istream_t * personality_content,
+     gta_access_policy_handle_t h_auth_use,
+     gta_access_policy_handle_t h_auth_admin,
+     struct gta_protection_properties_t requested_protection_properties,
+     gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_create,
-(
-    gta_instance_handle_t h_inst,
-    const gta_identifier_value_t identifier_value,
-    const gta_personality_name_t personality_name,
-    const gta_application_name_t application,
-    const gta_profile_name_t profile,
-    gta_access_policy_handle_t h_auth_use,
-    gta_access_policy_handle_t h_auth_admin,
-    struct gta_protection_properties_t requested_protection_properties,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_personality_create,
+    (gta_instance_handle_t h_inst,
+     const gta_identifier_value_t identifier_value,
+     const gta_personality_name_t personality_name,
+     const gta_application_name_t application,
+     const gta_profile_name_t profile,
+     gta_access_policy_handle_t h_auth_use,
+     gta_access_policy_handle_t h_auth_admin,
+     struct gta_protection_properties_t requested_protection_properties,
+     gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_enroll,
-(
-    gta_context_handle_t h_ctx,
-    gtaio_ostream_t * p_personality_enrollment_info,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_personality_enroll,
+    (gta_context_handle_t h_ctx, gtaio_ostream_t * p_personality_enrollment_info, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_enroll_auth,
-(
-    gta_context_handle_t h_ctx,
-    gta_context_handle_t h_auth_ctx,
-    gtaio_ostream_t * p_personality_enrollment_info,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_personality_enroll_auth,
+    (gta_context_handle_t h_ctx,
+     gta_context_handle_t h_auth_ctx,
+     gtaio_ostream_t * p_personality_enrollment_info,
+     gta_errinfo_t * p_errinfo))
 {
     bool ret = false;
 
@@ -483,15 +424,14 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_enroll_auth,
     return ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_attestate,
-(
-    gta_context_handle_t h_ctx,
-    const gta_personality_name_t personality_name,
-    gtaio_istream_t * nonce,
-    gtaio_ostream_t * p_attestation_data,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_personality_attestate,
+    (gta_context_handle_t h_ctx,
+     const gta_personality_name_t personality_name,
+     gtaio_istream_t * nonce,
+     gtaio_ostream_t * p_attestation_data,
+     gta_errinfo_t * p_errinfo))
 {
     bool ret = false;
 
@@ -502,122 +442,104 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_attestate,
     return ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_remove,
-(
-    gta_context_handle_t h_ctx,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_personality_remove,
+    (gta_context_handle_t h_ctx, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_deactivate,
-(
-    gta_context_handle_t h_ctx,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_personality_deactivate,
+    (gta_context_handle_t h_ctx, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_activate,
-(
-    gta_context_handle_t h_ctx,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_personality_activate,
+    (gta_context_handle_t h_ctx, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_add_trusted_attribute,
-(
-    gta_context_handle_t h_ctx,
-    const gta_personality_attribute_type_t attrtype,
-    const gta_personality_attribute_name_t attrname,
-    gtaio_istream_t * p_attrvalue,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_personality_add_trusted_attribute,
+    (gta_context_handle_t h_ctx,
+     const gta_personality_attribute_type_t attrtype,
+     const gta_personality_attribute_name_t attrname,
+     gtaio_istream_t * p_attrvalue,
+     gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_add_attribute,
-(
-    gta_context_handle_t h_ctx,
-    const gta_personality_attribute_type_t attrtype,
-    const gta_personality_attribute_name_t attrname,
-    gtaio_istream_t * p_attrvalue,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_personality_add_attribute,
+    (gta_context_handle_t h_ctx,
+     const gta_personality_attribute_type_t attrtype,
+     const gta_personality_attribute_name_t attrname,
+     gtaio_istream_t * p_attrvalue,
+     gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_get_attribute, (
-    gta_context_handle_t h_ctx,
-    const gta_personality_attribute_name_t attrname,
-    gtaio_ostream_t * p_attrvalue,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_personality_get_attribute,
+    (gta_context_handle_t h_ctx,
+     const gta_personality_attribute_name_t attrname,
+     gtaio_ostream_t * p_attrvalue,
+     gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_remove_attribute,
-(
-    gta_context_handle_t h_ctx,
-    const gta_personality_attribute_name_t attrname,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_personality_remove_attribute,
+    (gta_context_handle_t h_ctx, const gta_personality_attribute_name_t attrname, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_deactivate_attribute,
-(
-    gta_context_handle_t h_ctx,
-    const gta_personality_attribute_name_t attrname,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_personality_deactivate_attribute,
+    (gta_context_handle_t h_ctx, const gta_personality_attribute_name_t attrname, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_activate_attribute,
-(
-    gta_context_handle_t h_ctx,
-    gta_personality_attribute_name_t attrname,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_personality_activate_attribute,
+    (gta_context_handle_t h_ctx, gta_personality_attribute_name_t attrname, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_attributes_enumerate,
-(
-    gta_instance_handle_t h_inst,
-    const gta_personality_name_t personality_name,
-    gta_enum_handle_t * ph_enum,
-    gtaio_ostream_t * attribute_type,
-    gtaio_ostream_t * attribute_name,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_personality_attributes_enumerate,
+    (gta_instance_handle_t h_inst,
+     const gta_personality_name_t personality_name,
+     gta_enum_handle_t * ph_enum,
+     gtaio_ostream_t * attribute_type,
+     gtaio_ostream_t * attribute_name,
+     gta_errinfo_t * p_errinfo))
 {
     bool b_ret = false;
 
-    /* hardcoded behaviour for framework tests */
-    #define GTA_HANDLE_ENUM_1 ((gta_context_handle_t)-2)
-    #define GTA_HANDLE_ENUM_2 ((gta_context_handle_t)-3)
+/* hardcoded behaviour for framework tests */
+#define GTA_HANDLE_ENUM_1 ((gta_context_handle_t) - 2)
+#define GTA_HANDLE_ENUM_2 ((gta_context_handle_t) - 3)
 
     if (GTA_HANDLE_ENUM_FIRST == *ph_enum) {
         /* We don't write the output in the framework tests */
@@ -635,74 +557,54 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_personality_attributes_enumerate
     return b_ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_seal_data,
-(
-    gta_context_handle_t h_ctx,
-    gtaio_istream_t * data,
-    gtaio_ostream_t * protected_data,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_seal_data,
+    (gta_context_handle_t h_ctx, gtaio_istream_t * data, gtaio_ostream_t * protected_data, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_unseal_data,
-(
-    gta_context_handle_t h_ctx,
-    gtaio_istream_t * protected_data,
-    gtaio_ostream_t * data,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_unseal_data,
+    (gta_context_handle_t h_ctx, gtaio_istream_t * protected_data, gtaio_ostream_t * data, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_verify,
-(
-    gta_context_handle_t h_ctx,
-    gtaio_istream_t * claim,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_verify,
+    (gta_context_handle_t h_ctx, gtaio_istream_t * claim, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_authenticate_data_detached,
-(
-    gta_context_handle_t h_ctx,
-    gtaio_istream_t * data,
-    gtaio_ostream_t * seal,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_authenticate_data_detached,
+    (gta_context_handle_t h_ctx, gtaio_istream_t * data, gtaio_ostream_t * seal, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_verify_data_detached,
-(
-    gta_context_handle_t h_ctx,
-    gtaio_istream_t * data,
-    gtaio_istream_t * seal,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_verify_data_detached,
+    (gta_context_handle_t h_ctx, gtaio_istream_t * data, gtaio_istream_t * seal, gta_errinfo_t * p_errinfo))
 {
     return true;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_security_association_initialize,
-(
-    gta_context_handle_t h_ctx,
-    gtaio_istream_t * in,
-    gtaio_ostream_t * out,
-    bool * pb_finished,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_security_association_initialize,
+    (gta_context_handle_t h_ctx,
+     gtaio_istream_t * in,
+     gtaio_ostream_t * out,
+     bool * pb_finished,
+     gta_errinfo_t * p_errinfo))
 {
     bool ret = false;
 
@@ -713,15 +615,14 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_security_association_initialize,
     return ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_security_association_accept,
-(
-    gta_context_handle_t h_ctx,
-    gtaio_istream_t * in,
-    gtaio_ostream_t * out,
-    bool * pb_finished,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_security_association_accept,
+    (gta_context_handle_t h_ctx,
+     gtaio_istream_t * in,
+     gtaio_ostream_t * out,
+     bool * pb_finished,
+     gta_errinfo_t * p_errinfo))
 {
     bool ret = false;
 
@@ -732,12 +633,10 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_security_association_accept,
     return ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_security_association_destroy,
-(
-    gta_context_handle_t h_ctx,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_security_association_destroy,
+    (gta_context_handle_t h_ctx, gta_errinfo_t * p_errinfo))
 {
     bool ret = false;
 
@@ -748,14 +647,10 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_security_association_destroy,
     return ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_seal_message,
-(
-    gta_context_handle_t h_ctx,
-    gtaio_istream_t * msg,
-    gtaio_ostream_t * sealed_msg,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_seal_message,
+    (gta_context_handle_t h_ctx, gtaio_istream_t * msg, gtaio_ostream_t * sealed_msg, gta_errinfo_t * p_errinfo))
 {
     bool ret = false;
 
@@ -766,14 +661,10 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_seal_message,
     return ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_unseal_message,
-(
-    gta_context_handle_t h_ctx,
-    gtaio_istream_t * sealed_msg,
-    gtaio_ostream_t * msg,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_unseal_message,
+    (gta_context_handle_t h_ctx, gtaio_istream_t * sealed_msg, gtaio_ostream_t * msg, gta_errinfo_t * p_errinfo))
 {
     bool ret = false;
 
@@ -784,13 +675,10 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_unseal_message,
     return ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_get_random_bytes,
-(
-    size_t num_bytes,
-    gtaio_ostream_t * rnd_stream,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_get_random_bytes,
+    (size_t num_bytes, gtaio_ostream_t * rnd_stream, gta_errinfo_t * p_errinfo))
 {
     bool ret = false;
 
@@ -801,14 +689,13 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_get_random_bytes,
     return ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_attestate,
-(
-    gta_context_handle_t h_ctx,
-    gtaio_istream_t * nonce,
-    gtaio_ostream_t * attestation_data,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_attestate,
+    (gta_context_handle_t h_ctx,
+     gtaio_istream_t * nonce,
+     gtaio_ostream_t * attestation_data,
+     gta_errinfo_t * p_errinfo))
 {
     bool ret = false;
 
@@ -819,14 +706,10 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_attestate,
     return ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_trustex_function_install,
-(
-    const char * function_name,
-    gta_profile_name_t profile_name,
-    gtaio_istream_t function,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_trustex_function_install,
+    (const char * function_name, gta_profile_name_t profile_name, gtaio_istream_t function, gta_errinfo_t * p_errinfo))
 {
     bool ret = false;
 
@@ -837,12 +720,10 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_trustex_function_install,
     return ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_trustex_function_uninstall,
-(
-    const char * function_name,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_trustex_function_uninstall,
+    (const char * function_name, gta_errinfo_t * p_errinfo))
 {
     bool ret = false;
 
@@ -853,15 +734,14 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_trustex_function_uninstall,
     return ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_trustex_function_execute,
-(
-    const char * function_name,
-    gta_handle_t function_handle,
-    gtaio_istream_t input,
-    gtaio_ostream_t output,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_trustex_function_execute,
+    (const char * function_name,
+     gta_handle_t function_handle,
+     gtaio_istream_t input,
+     gtaio_ostream_t output,
+     gta_errinfo_t * p_errinfo))
 {
     bool ret = false;
 
@@ -872,12 +752,10 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_trustex_function_execute,
     return ret;
 }
 
-
-GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_trustex_function_terminate,
-(
-    gta_handle_t function_handle,
-    gta_errinfo_t * p_errinfo
-    ))
+GTA_DEFINE_FUNCTION(
+    bool,
+    unittest_provider_gta_trustex_function_terminate,
+    (gta_handle_t function_handle, gta_errinfo_t * p_errinfo))
 {
     bool ret = false;
 
@@ -888,9 +766,7 @@ GTA_DEFINE_FUNCTION(bool, unittest_provider_gta_trustex_function_terminate,
     return ret;
 }
 
-
-static const struct gta_function_list_t g_my_function_list =
-{
+static const struct gta_function_list_t g_my_function_list = {
     unittest_provider_gta_access_token_get_physical_presence,
     unittest_provider_gta_access_token_get_issuing,
     unittest_provider_gta_access_token_get_basic,
@@ -940,5 +816,4 @@ static const struct gta_function_list_t g_my_function_list =
     unittest_provider_gta_trustex_function_install,
     unittest_provider_gta_trustex_function_uninstall,
     unittest_provider_gta_trustex_function_execute,
-    unittest_provider_gta_trustex_function_terminate
-};
+    unittest_provider_gta_trustex_function_terminate};

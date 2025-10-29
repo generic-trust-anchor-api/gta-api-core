@@ -44,17 +44,16 @@
  */
 #include "gta_memset.h"
 
-errno_t gta_memset(void *s, rsize_t smax, int c, rsize_t n)
+errno_t gta_memset(void * s, rsize_t smax, int c, rsize_t n)
 {
     errno_t ret = EINVAL;
     rsize_t lim = 0;
     unsigned char v;
-    volatile unsigned char *dst;
+    volatile unsigned char * dst;
 
     if (n < smax) {
         lim = n;
-    }
-    else {
+    } else {
         lim = smax;
     }
 
@@ -71,4 +70,3 @@ errno_t gta_memset(void *s, rsize_t smax, int c, rsize_t n)
     }
     return ret;
 }
-
