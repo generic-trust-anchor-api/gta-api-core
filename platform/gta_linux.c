@@ -1,12 +1,14 @@
-/* SPDX-License-Identifier: Apache-2.0 */
-/**********************************************************************
- * Copyright (c) 2024, Siemens AG
- **********************************************************************/
+/*
+ * SPDX-FileCopyrightText: Copyright 2024 Siemens
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include "gta_linux.h"
 
 #include <gta_api.h>
-#include "gta_linux.h"
-#include <stdlib.h>
 #include <pthread.h>
+#include <stdlib.h>
 
 GTA_DEFINE_FUNCTION(gta_mutex_t, gta_linux_mutex_create, ())
 {
@@ -23,15 +25,11 @@ GTA_DEFINE_FUNCTION(gta_mutex_t, gta_linux_mutex_create, ())
     return ((gta_mutex_t)p_mutex);
 }
 
-GTA_DEFINE_FUNCTION(bool, gta_linux_mutex_destroy,
-(
-    gta_mutex_t mutex
-))
+GTA_DEFINE_FUNCTION(bool, gta_linux_mutex_destroy, (gta_mutex_t mutex))
 {
     bool b_ret = false;
 
-    if ((GTA_HANDLE_INVALID != mutex) 
-        && (0 == pthread_mutex_destroy(mutex))){
+    if ((GTA_HANDLE_INVALID != mutex) && (0 == pthread_mutex_destroy(mutex))) {
 
         b_ret = true;
         free(mutex);
@@ -40,15 +38,11 @@ GTA_DEFINE_FUNCTION(bool, gta_linux_mutex_destroy,
     return b_ret;
 }
 
-GTA_DEFINE_FUNCTION(bool, gta_linux_mutex_lock,
-(
-    gta_mutex_t mutex
-))
+GTA_DEFINE_FUNCTION(bool, gta_linux_mutex_lock, (gta_mutex_t mutex))
 {
     bool b_ret = false;
 
-    if ((GTA_HANDLE_INVALID != mutex)
-        && (0 == pthread_mutex_lock(mutex))){
+    if ((GTA_HANDLE_INVALID != mutex) && (0 == pthread_mutex_lock(mutex))) {
 
         b_ret = true;
     }
@@ -56,19 +50,15 @@ GTA_DEFINE_FUNCTION(bool, gta_linux_mutex_lock,
     return b_ret;
 }
 
-GTA_DEFINE_FUNCTION(bool, gta_linux_mutex_unlock,
-(
-    gta_mutex_t mutex
-))
+GTA_DEFINE_FUNCTION(bool, gta_linux_mutex_unlock, (gta_mutex_t mutex))
 {
     bool b_ret = false;
 
-    if ((GTA_HANDLE_INVALID != mutex)
-        && (0 == pthread_mutex_unlock(mutex))){
+    if ((GTA_HANDLE_INVALID != mutex) && (0 == pthread_mutex_unlock(mutex))) {
         b_ret = true;
     }
 
     return b_ret;
 }
 
- /*** end of file ***/
+/*** end of file ***/

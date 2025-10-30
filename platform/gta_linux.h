@@ -1,16 +1,16 @@
-/* SPDX-License-Identifier: Apache-2.0 */
-/**********************************************************************
- * Copyright (c) 2024, Siemens AG
- **********************************************************************/
+/*
+ * SPDX-FileCopyrightText: Copyright 2024 Siemens
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef GTA_LINUX_H
 #define GTA_LINUX_H
 
 #if defined(__cplusplus)
-    /* *INDENT-OFF* */
-extern "C"
-{
-    /* *INDENT-ON* */
+/* *INDENT-OFF* */
+extern "C" {
+/* *INDENT-ON* */
 #endif
 
 /*---------------------------------------------------------------------*/

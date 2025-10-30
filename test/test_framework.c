@@ -1,23 +1,24 @@
-/* SPDX-License-Identifier: Apache-2.0 */
-/**********************************************************************
- * Copyright (c) 2024-2025, Siemens AG
- **********************************************************************/
+/*
+ * SPDX-FileCopyrightText: Copyright 2024-2025 Siemens
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
-#include <stdio.h>
-
-#include <stdarg.h>
-#include <stddef.h>
 #include <setjmp.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include <cmocka.h>
 
 #ifdef WINDOWS
-#include <stdlib.h>
 #include <crtdbg.h>
 #include <gta_windows.h>
+#include <stdlib.h>
 #endif /* WINDOWS */
 
 #ifdef LINUX
@@ -25,9 +26,16 @@
 #endif /* LINUX */
 
 #include <gta_api.h>
+#include <gta_list.h>
 #include <gta_memset.h>
 
-extern const struct gta_function_list_t * unittest_provider_init(gta_context_handle_t, gtaio_istream_t *, gtaio_ostream_t *, void **, void(**)(void *),  gta_errinfo_t *);
+extern const struct gta_function_list_t * unittest_provider_init(
+    gta_context_handle_t,
+    gtaio_istream_t *,
+    gtaio_ostream_t *,
+    void **,
+    void (**)(void *),
+    gta_errinfo_t *);
 
 struct framework_test_params_t {
     gta_instance_handle_t h_inst;
@@ -41,12 +49,11 @@ struct framework_test_params_t {
  * GTA tests suites
  */
 
-int
-init_suite_framework(void **state)
+int init_suite_framework(void ** state)
 {
     struct framework_test_params_t * framework_test_params = NULL;
     gta_errinfo_t errinfo = 0;
-    struct gta_instance_params_t inst_params = { 0 };
+    struct gta_instance_params_t inst_params = {0};
 
     framework_test_params = malloc(sizeof(struct framework_test_params_t));
     assert_non_null(framework_test_params);
@@ -145,7 +152,7 @@ init_suite_framework(void **state)
     assert_non_null(framework_test_params->h_inst);
 
     /* instance_final() negative test */
-    assert_false(gta_instance_final(NULL,NULL));
+    assert_false(gta_instance_final(NULL, NULL));
 
     /* Register provider */
     struct gta_provider_info_t provider_info_wrong = {
@@ -153,34 +160,19 @@ init_suite_framework(void **state)
         .type = GTA_PROVIDER_INFO_CALLBACK + 1 /* unsupported */,
         .provider_init = unittest_provider_init,
         .provider_init_config = NULL,
-        .profile_info = {
-            .profile_name = NULL,
-            .protection_properties = {0},
-            .priority = 0
-        }
-    };
+        .profile_info = {.profile_name = NULL, .protection_properties = {0}, .priority = 0}};
     struct gta_provider_info_t provider_info_1 = {
         .version = 0,
         .type = GTA_PROVIDER_INFO_CALLBACK,
         .provider_init = unittest_provider_init,
         .provider_init_config = NULL,
-        .profile_info = {
-            .profile_name = "profile1",
-            .protection_properties = {0},
-            .priority = 0
-        }
-    };
+        .profile_info = {.profile_name = "profile1", .protection_properties = {0}, .priority = 0}};
     struct gta_provider_info_t provider_info_2 = {
         .version = 0,
         .type = GTA_PROVIDER_INFO_CALLBACK,
         .provider_init = unittest_provider_init,
         .provider_init_config = NULL,
-        .profile_info = {
-            .profile_name = "profile2",
-            .protection_properties = {0},
-            .priority = 0
-        }
-    };
+        .profile_info = {.profile_name = "profile2", .protection_properties = {0}, .priority = 0}};
     assert_false(gta_register_provider(NULL, &provider_info_wrong, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
     assert_false(gta_register_provider(framework_test_params->h_inst, NULL, &errinfo));
@@ -199,58 +191,40 @@ init_suite_framework(void **state)
     assert_true(gta_register_provider(framework_test_params->h_inst, &provider_info_2, &errinfo));
 
     /* Context open */
-    framework_test_params->h_ctx = gta_context_open(NULL,
-        NULL,
-        NULL,
-        &errinfo);
+    framework_test_params->h_ctx = gta_context_open(NULL, NULL, NULL, &errinfo);
     assert_null(framework_test_params->h_ctx);
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
-    framework_test_params->h_ctx = gta_context_open(framework_test_params->h_inst,
-        "personality1",
-        NULL,
-        &errinfo);
+    framework_test_params->h_ctx = gta_context_open(framework_test_params->h_inst, "personality1", NULL, &errinfo);
     assert_null(framework_test_params->h_ctx);
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
-    framework_test_params->h_ctx = gta_context_open(framework_test_params->h_inst,
-        NULL,
-        "profile1",
-        &errinfo);
+    framework_test_params->h_ctx = gta_context_open(framework_test_params->h_inst, NULL, "profile1", &errinfo);
     assert_null(framework_test_params->h_ctx);
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-   framework_test_params->h_ctx = gta_context_open(framework_test_params->h_inst,
-        "personality4",
-        "profile1",
-        &errinfo);
+    framework_test_params->h_ctx =
+        gta_context_open(framework_test_params->h_inst, "personality4", "profile1", &errinfo);
     assert_null(framework_test_params->h_ctx);
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    framework_test_params->h_ctx = gta_context_open(framework_test_params->h_inst,
-        "personality1",
-        "profile3",
-        &errinfo);
+    framework_test_params->h_ctx =
+        gta_context_open(framework_test_params->h_inst, "personality1", "profile3", &errinfo);
     assert_null(framework_test_params->h_ctx);
     assert_int_equal(errinfo, GTA_ERROR_PROFILE_UNSUPPORTED);
 
-    framework_test_params->h_ctx = gta_context_open(framework_test_params->h_inst,
-        "personality2",
-        "profile1",
-        &errinfo);
+    framework_test_params->h_ctx =
+        gta_context_open(framework_test_params->h_inst, "personality2", "profile1", &errinfo);
     assert_non_null(framework_test_params->h_ctx);
 
     if (NULL != framework_test_params->h_inst_mutex) {
         assert_true(gta_register_provider(framework_test_params->h_inst_mutex, &provider_info_1, &errinfo));
-        framework_test_params->h_ctx_mutex = gta_context_open(framework_test_params->h_inst_mutex,
-            "personality1",
-            "profile1",
-            &errinfo);
+        framework_test_params->h_ctx_mutex =
+            gta_context_open(framework_test_params->h_inst_mutex, "personality1", "profile1", &errinfo);
         assert_non_null(framework_test_params->h_ctx_mutex);
     }
     return 0;
 }
 
-int
-clean_suite_framework(void **state)
+int clean_suite_framework(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
@@ -295,8 +269,7 @@ clean_suite_framework(void **state)
     return 0;
 }
 
-int
-init_suite_framework_exceptions(void **state)
+int init_suite_framework_exceptions(void ** state)
 {
     struct framework_test_params_t * framework_test_params = NULL;
     gta_errinfo_t errinfo = 0;
@@ -305,13 +278,12 @@ init_suite_framework_exceptions(void **state)
         {
             .calloc = &calloc,
             .free = &free,
-            .mutex_create  = NULL,
+            .mutex_create = NULL,
             .mutex_destroy = NULL,
-            .mutex_lock    = NULL,
-            .mutex_unlock  = NULL,
+            .mutex_lock = NULL,
+            .mutex_unlock = NULL,
         },
-        NULL
-    };
+        NULL};
 
     framework_test_params = malloc(sizeof(struct framework_test_params_t));
     assert_non_null(framework_test_params);
@@ -337,8 +309,7 @@ init_suite_framework_exceptions(void **state)
  * individual test functions
  */
 
-static void
-test_gta_access_policy(void ** state)
+static void test_gta_access_policy(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     bool ret = false;
@@ -356,38 +327,35 @@ test_gta_access_policy(void ** state)
         (char)0xAF, (char)0xFE, (char)0xAF, (char)0xFE, (char)0xAF, (char)0xFE, (char)0xAF, (char)0xFE,
         (char)0xAF, (char)0xFE, (char)0xAF, (char)0xFE, (char)0xAF, (char)0xFE, (char)0xAF, (char)0xFE,
         (char)0xAF, (char)0xFE, (char)0xAF, (char)0xFE, (char)0xAF, (char)0xFE, (char)0xAF, (char)0xFE,
-        (char)0xAF, (char)0xFE, (char)0xAF, (char)0xFE, (char)0xAF, (char)0xFE, (char)0xAF, (char)0xFE
-    };
+        (char)0xAF, (char)0xFE, (char)0xAF, (char)0xFE, (char)0xAF, (char)0xFE, (char)0xAF, (char)0xFE};
     gta_profile_name_t profile = "ch.iec.30168.poc_verify";
 
     /*
      * simple access policies
      */
-    gta_access_descriptor_type_t access_token_simple_types[] =
-    {
+    gta_access_descriptor_type_t access_token_simple_types[] = {
         GTA_ACCESS_DESCRIPTOR_TYPE_INITIAL,
         GTA_ACCESS_DESCRIPTOR_TYPE_BASIC_TOKEN,
-        GTA_ACCESS_DESCRIPTOR_TYPE_PHYSICAL_PRESENCE_TOKEN
-    };
+        GTA_ACCESS_DESCRIPTOR_TYPE_PHYSICAL_PRESENCE_TOKEN};
     int access_token_simple_types_idx = 0;
 
     assert_null(gta_access_policy_simple(framework_test_params->h_inst, 0, NULL));
 
-    for (access_token_simple_types_idx = 0;
-        (size_t)access_token_simple_types_idx < sizeof(access_token_simple_types) / sizeof(gta_access_descriptor_type_t);
-        access_token_simple_types_idx++) {
+    for (access_token_simple_types_idx = 0; (size_t)access_token_simple_types_idx <
+                                            sizeof(access_token_simple_types) / sizeof(gta_access_descriptor_type_t);
+         access_token_simple_types_idx++) {
 
-        gta_access_descriptor_type_t access_token_descriptor_type
-            = access_token_simple_types[access_token_simple_types_idx];
+        gta_access_descriptor_type_t access_token_descriptor_type =
+            access_token_simple_types[access_token_simple_types_idx];
 
-        h_access_policy = gta_access_policy_simple(framework_test_params->h_inst, access_token_descriptor_type, &errinfo);
+        h_access_policy =
+            gta_access_policy_simple(framework_test_params->h_inst, access_token_descriptor_type, &errinfo);
         assert_int_not_equal(GTA_HANDLE_INVALID, h_access_policy);
 
         /* enumerate the tokens in the access policy */
         simple_access_token_descriptor_cnt = 0;
         h_enum = GTA_HANDLE_ENUM_FIRST;
-        do
-        {
+        do {
 #if 0
             gta_enum_handle_t h_enum_invalid
                 = (gta_enum_handle_t)(((char *)h_enum) + 1);
@@ -398,24 +366,24 @@ test_gta_access_policy(void ** state)
             assert_int_equal(GTA_ERROR_HANDLE_INVALID, errinfo)
 #endif
 
-            ret = gta_access_policy_enumerate(h_access_policy,
-                &h_enum, &h_access_token_descriptor, &errinfo);
+            ret = gta_access_policy_enumerate(h_access_policy, &h_enum, &h_access_token_descriptor, &errinfo);
 
-            if (ret)
-            {
+            if (ret) {
                 const char * p_attr = NULL;
                 size_t attr_len = 0;
 
-                assert_false(gta_access_policy_get_access_descriptor_type(h_access_policy,
-                    h_access_token_descriptor, &token_type, NULL));
+                assert_false(gta_access_policy_get_access_descriptor_type(
+                    h_access_policy, h_access_token_descriptor, &token_type, NULL));
                 /* mess with access token descriptor handle */
-                assert_false(gta_access_policy_get_access_descriptor_type(h_access_policy,
+                assert_false(gta_access_policy_get_access_descriptor_type(
+                    h_access_policy,
                     (gta_access_descriptor_handle_t)(((char *)h_access_token_descriptor) + 1),
-                    &token_type, &errinfo));
+                    &token_type,
+                    &errinfo));
                 assert_int_equal(GTA_ERROR_HANDLE_INVALID, errinfo);
 
-                assert_true(gta_access_policy_get_access_descriptor_type(h_access_policy,
-                    h_access_token_descriptor, &token_type, &errinfo));
+                assert_true(gta_access_policy_get_access_descriptor_type(
+                    h_access_policy, h_access_token_descriptor, &token_type, &errinfo));
 
                 if (token_type == access_token_descriptor_type) {
                     simple_access_token_descriptor_cnt++;
@@ -424,19 +392,23 @@ test_gta_access_policy(void ** state)
                     p_attr[0] = 1;
 #endif
                     assert_false(gta_access_policy_get_access_descriptor_attribute(
-                        h_access_token_descriptor, GTA_ACCESS_DESCRIPTOR_ATTR_PROFILE_NAME,
-                        &p_attr, &attr_len, NULL));
+                        h_access_token_descriptor, GTA_ACCESS_DESCRIPTOR_ATTR_PROFILE_NAME, &p_attr, &attr_len, NULL));
                     assert_false(gta_access_policy_get_access_descriptor_attribute(
-                        h_access_token_descriptor, GTA_ACCESS_DESCRIPTOR_ATTR_PROFILE_NAME,
-                        &p_attr, &attr_len, &errinfo));
+                        h_access_token_descriptor,
+                        GTA_ACCESS_DESCRIPTOR_ATTR_PROFILE_NAME,
+                        &p_attr,
+                        &attr_len,
+                        &errinfo));
                     assert_int_equal(GTA_ERROR_INVALID_ATTRIBUTE, errinfo);
 
                     assert_false(gta_access_policy_get_access_descriptor_attribute(
-                        h_access_token_descriptor, GTA_ACCESS_DESCRIPTOR_ATTR_PERS_FINGERPRINT,
-                        &p_attr, &attr_len, &errinfo));
+                        h_access_token_descriptor,
+                        GTA_ACCESS_DESCRIPTOR_ATTR_PERS_FINGERPRINT,
+                        &p_attr,
+                        &attr_len,
+                        &errinfo));
                     assert_int_equal(GTA_ERROR_INVALID_ATTRIBUTE, errinfo);
-                }
-                else {
+                } else {
                     assert_true(false);
                 }
             }
@@ -448,64 +420,53 @@ test_gta_access_policy(void ** state)
 
         errinfo = 0;
         assert_false(gta_access_policy_destroy(h_access_policy, &errinfo));
-        //assert_true(GTA_ERROR_INVALID_PARAMETER == errinfo || 0 == errinfo); TODO!
+        // assert_true(GTA_ERROR_INVALID_PARAMETER == errinfo || 0 == errinfo); TODO!
     }
 
     errinfo = 0;
-    h_access_policy = gta_access_policy_simple(framework_test_params->h_inst,
-        GTA_ACCESS_DESCRIPTOR_TYPE_PERS_DERIVED_TOKEN, &errinfo);
+    h_access_policy = gta_access_policy_simple(
+        framework_test_params->h_inst, GTA_ACCESS_DESCRIPTOR_TYPE_PERS_DERIVED_TOKEN, &errinfo);
     assert_int_equal(GTA_HANDLE_INVALID, h_access_policy);
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
-
 
     /*
      * complex access policies
      */
     assert_null(gta_access_policy_create(NULL, NULL));
-    h_access_policy = gta_access_policy_create(NULL,
-        &errinfo);
+    h_access_policy = gta_access_policy_create(NULL, &errinfo);
     assert_int_equal(GTA_HANDLE_INVALID, h_access_policy);
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    h_access_policy = gta_access_policy_create(framework_test_params->h_inst,
-        &errinfo);
+    h_access_policy = gta_access_policy_create(framework_test_params->h_inst, &errinfo);
     assert_int_not_equal(GTA_HANDLE_INVALID, h_access_policy);
 
-    assert_false(gta_access_policy_add_basic_access_token_descriptor(NULL,
-        NULL));
-    assert_false(gta_access_policy_add_basic_access_token_descriptor(NULL,
-        &errinfo));
+    assert_false(gta_access_policy_add_basic_access_token_descriptor(NULL, NULL));
+    assert_false(gta_access_policy_add_basic_access_token_descriptor(NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_true(gta_access_policy_add_basic_access_token_descriptor(
-        h_access_policy, &errinfo));
+    assert_true(gta_access_policy_add_basic_access_token_descriptor(h_access_policy, &errinfo));
 
-    assert_false(gta_access_policy_add_pers_derived_access_token_descriptor(
-        NULL, personality_fingerprint, profile, NULL));
+    assert_false(
+        gta_access_policy_add_pers_derived_access_token_descriptor(NULL, personality_fingerprint, profile, NULL));
     assert_false(gta_access_policy_add_pers_derived_access_token_descriptor(
         h_access_policy, personality_fingerprint, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
-    assert_false(gta_access_policy_add_pers_derived_access_token_descriptor(
-        NULL, personality_fingerprint, profile, &errinfo));
+    assert_false(
+        gta_access_policy_add_pers_derived_access_token_descriptor(NULL, personality_fingerprint, profile, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
     assert_true(gta_access_policy_add_pers_derived_access_token_descriptor(
         h_access_policy, personality_fingerprint, profile, &errinfo));
 
-    assert_false(gta_access_policy_add_physical_presence_access_token_descriptor(
-        NULL, NULL));
-    assert_false(gta_access_policy_add_physical_presence_access_token_descriptor(
-        NULL, &errinfo));
+    assert_false(gta_access_policy_add_physical_presence_access_token_descriptor(NULL, NULL));
+    assert_false(gta_access_policy_add_physical_presence_access_token_descriptor(NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
-    assert_true(gta_access_policy_add_physical_presence_access_token_descriptor(
-        h_access_policy, &errinfo));
-    assert_true(gta_access_policy_add_physical_presence_access_token_descriptor(
-        h_access_policy, &errinfo));
+    assert_true(gta_access_policy_add_physical_presence_access_token_descriptor(h_access_policy, &errinfo));
+    assert_true(gta_access_policy_add_physical_presence_access_token_descriptor(h_access_policy, &errinfo));
 
     /* enumerate the tokens in the access policy */
     h_enum = GTA_HANDLE_ENUM_FIRST;
-    do
-    {
+    do {
 #if 0
         gta_enum_handle_t h_enum_invalid
             = (gta_enum_handle_t)(((char *)h_enum)+1);
@@ -516,25 +477,24 @@ test_gta_access_policy(void ** state)
         assert_int_equal(GTA_ERROR_HANDLE_INVALID, errinfo)
 #endif
 
-        ret = gta_access_policy_enumerate(h_access_policy,
-            &h_enum, &h_access_token_descriptor, &errinfo);
+        ret = gta_access_policy_enumerate(h_access_policy, &h_enum, &h_access_token_descriptor, &errinfo);
 
-        if (ret)
-        {
+        if (ret) {
             const char * p_attr = NULL;
             size_t attr_len = 0;
 
             /* mess with access token descriptor handle */
-            assert_false(gta_access_policy_get_access_descriptor_type(h_access_policy,
-               (gta_access_descriptor_handle_t)(((char *)h_access_token_descriptor)+0xFA81),
-                &token_type, &errinfo));
+            assert_false(gta_access_policy_get_access_descriptor_type(
+                h_access_policy,
+                (gta_access_descriptor_handle_t)(((char *)h_access_token_descriptor) + 0xFA81),
+                &token_type,
+                &errinfo));
             assert_int_equal(GTA_ERROR_HANDLE_INVALID, errinfo);
 
-            assert_true(gta_access_policy_get_access_descriptor_type(h_access_policy,
-                h_access_token_descriptor, &token_type, &errinfo));
+            assert_true(gta_access_policy_get_access_descriptor_type(
+                h_access_policy, h_access_token_descriptor, &token_type, &errinfo));
 
-            switch (token_type)
-            {
+            switch (token_type) {
             case GTA_ACCESS_DESCRIPTOR_TYPE_BASIC_TOKEN:
                 basic_access_token_descriptor_cnt++;
 
@@ -542,13 +502,15 @@ test_gta_access_policy(void ** state)
                 p_attr[0] = 1;
 #endif
                 assert_false(gta_access_policy_get_access_descriptor_attribute(
-                    h_access_token_descriptor, GTA_ACCESS_DESCRIPTOR_ATTR_PROFILE_NAME,
-                    &p_attr, &attr_len, &errinfo));
+                    h_access_token_descriptor, GTA_ACCESS_DESCRIPTOR_ATTR_PROFILE_NAME, &p_attr, &attr_len, &errinfo));
                 assert_int_equal(GTA_ERROR_INVALID_ATTRIBUTE, errinfo);
 
                 assert_false(gta_access_policy_get_access_descriptor_attribute(
-                    h_access_token_descriptor, GTA_ACCESS_DESCRIPTOR_ATTR_PERS_FINGERPRINT,
-                    &p_attr, &attr_len, &errinfo));
+                    h_access_token_descriptor,
+                    GTA_ACCESS_DESCRIPTOR_ATTR_PERS_FINGERPRINT,
+                    &p_attr,
+                    &attr_len,
+                    &errinfo));
                 assert_int_equal(GTA_ERROR_INVALID_ATTRIBUTE, errinfo);
 
                 break;
@@ -558,20 +520,23 @@ test_gta_access_policy(void ** state)
                 assert_false(gta_access_policy_get_access_descriptor_attribute(
                     h_access_token_descriptor,
                     /* invalid attribute */
-                    GTA_ACCESS_DESCRIPTOR_ATTR_PROFILE_NAME
-                    + GTA_ACCESS_DESCRIPTOR_ATTR_PERS_FINGERPRINT,
-                    &p_attr, &attr_len, &errinfo));
+                    GTA_ACCESS_DESCRIPTOR_ATTR_PROFILE_NAME + GTA_ACCESS_DESCRIPTOR_ATTR_PERS_FINGERPRINT,
+                    &p_attr,
+                    &attr_len,
+                    &errinfo));
                 assert_int_equal(GTA_ERROR_INVALID_ATTRIBUTE, errinfo);
 
                 assert_true(gta_access_policy_get_access_descriptor_attribute(
-                    h_access_token_descriptor, GTA_ACCESS_DESCRIPTOR_ATTR_PROFILE_NAME,
-                    &p_attr, &attr_len, &errinfo));
+                    h_access_token_descriptor, GTA_ACCESS_DESCRIPTOR_ATTR_PROFILE_NAME, &p_attr, &attr_len, &errinfo));
                 assert_int_equal(attr_len, strlen(profile));
                 assert_int_equal(0, memcmp(p_attr, profile, attr_len));
 
                 assert_true(gta_access_policy_get_access_descriptor_attribute(
-                    h_access_token_descriptor, GTA_ACCESS_DESCRIPTOR_ATTR_PERS_FINGERPRINT,
-                    &p_attr, &attr_len, &errinfo));
+                    h_access_token_descriptor,
+                    GTA_ACCESS_DESCRIPTOR_ATTR_PERS_FINGERPRINT,
+                    &p_attr,
+                    &attr_len,
+                    &errinfo));
                 assert_int_equal(attr_len, sizeof(gta_personality_fingerprint_t));
                 assert_int_equal(0, memcmp(p_attr, personality_fingerprint, attr_len));
 
@@ -580,13 +545,15 @@ test_gta_access_policy(void ** state)
                 physical_presence_access_token_descriptor_cnt++;
 
                 assert_false(gta_access_policy_get_access_descriptor_attribute(
-                    h_access_token_descriptor, GTA_ACCESS_DESCRIPTOR_ATTR_PROFILE_NAME,
-                    &p_attr, &attr_len, &errinfo));
+                    h_access_token_descriptor, GTA_ACCESS_DESCRIPTOR_ATTR_PROFILE_NAME, &p_attr, &attr_len, &errinfo));
                 assert_int_equal(GTA_ERROR_INVALID_ATTRIBUTE, errinfo);
 
                 assert_false(gta_access_policy_get_access_descriptor_attribute(
-                    h_access_token_descriptor, GTA_ACCESS_DESCRIPTOR_ATTR_PERS_FINGERPRINT,
-                    &p_attr, &attr_len, &errinfo));
+                    h_access_token_descriptor,
+                    GTA_ACCESS_DESCRIPTOR_ATTR_PERS_FINGERPRINT,
+                    &p_attr,
+                    &attr_len,
+                    &errinfo));
                 assert_int_equal(GTA_ERROR_INVALID_ATTRIBUTE, errinfo);
 
                 break;
@@ -607,14 +574,13 @@ test_gta_access_policy(void ** state)
     assert_true(gta_access_policy_destroy(h_access_policy, &errinfo));
 }
 
-static void
-test_gta_secmem(void ** state)
+static void test_gta_secmem(void ** state)
 {
     /* @todo Add negative tests, e.g., freeing invalid pointers, double free,
              read after free ... */
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    void * p_0, * p_1, * p_2, * p_3, * p_4, * p_5;
+    void *p_0, *p_1, *p_2, *p_3, *p_4, *p_5;
 
     assert_null(gta_secmem_calloc(NULL, 0, sizeof(uint8_t), NULL));
     p_0 = gta_secmem_calloc(NULL, 0, sizeof(uint8_t), &errinfo);
@@ -643,10 +609,10 @@ test_gta_secmem(void ** state)
     errinfo = 0;
     p_5 = gta_secmem_checkptr(framework_test_params->h_ctx, NULL, &errinfo);
     assert_null(p_5);
-    //assert_int_equal(errinfo, 0);
+    // assert_int_equal(errinfo, 0);
 
     p_5 = gta_secmem_checkptr(framework_test_params->h_ctx, p_4, &errinfo);
-    //assert_int_equal(p_4, p_5); TODO!
+    // assert_int_equal(p_4, p_5); TODO!
 
     assert_false(gta_secmem_free(NULL, p_2, NULL));
     assert_false(gta_secmem_free(NULL, p_2, &errinfo));
@@ -669,8 +635,7 @@ test_gta_secmem(void ** state)
     assert_true(gta_secmem_free(framework_test_params->h_ctx, p_3, &errinfo));
 }
 
-static void
-test_gta_mutex(void ** state)
+static void test_gta_mutex(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_mutex_t mutex = GTA_HANDLE_INVALID;
@@ -717,107 +682,141 @@ test_gta_mutex(void ** state)
     assert_true(gta_mutex_destroy(framework_test_params->h_ctx_mutex, mutex));
 }
 
-static void
-test_gta_identifier(void ** state)
+static void test_gta_identifier(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
     gta_enum_handle_t h_enum = GTA_HANDLE_ENUM_FIRST;
-    gtaio_ostream_t identifier_type = { 0 };
-    gtaio_ostream_t identifier_value = { 0 };
+    gtaio_ostream_t identifier_type = {0};
+    gtaio_ostream_t identifier_value = {0};
 
-    assert_false(gta_identifier_assign(framework_test_params->h_inst,
-        NULL, NULL, &errinfo));
+    assert_false(gta_identifier_assign(framework_test_params->h_inst, NULL, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
     /* should fail, because an identifier with this name already exists */
-    assert_false(gta_identifier_assign(framework_test_params->h_inst,
-        "identifier_type", "identifier2", &errinfo));
+    assert_false(gta_identifier_assign(framework_test_params->h_inst, "identifier_type", "identifier2", &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_NAME_ALREADY_EXISTS);
 
-    assert_true(gta_identifier_assign(framework_test_params->h_inst,
-        "identifier_type", "identifier4", &errinfo));
+    assert_true(gta_identifier_assign(framework_test_params->h_inst, "identifier_type", "identifier4", &errinfo));
 
     /* negative tests for gta_identifier_enumerate */
     assert_false(gta_identifier_enumerate(NULL, NULL, NULL, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_identifier_enumerate(NULL, &h_enum, &identifier_type,
-        &identifier_value, &errinfo));
+    assert_false(gta_identifier_enumerate(NULL, &h_enum, &identifier_type, &identifier_value, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 }
 
-static void
-test_gta_personality(void ** state)
+static void test_gta_personality(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    struct gta_protection_properties_t protection_properties = { 0 };
-    gtaio_istream_t personality_content = { 0 };
+    struct gta_protection_properties_t protection_properties = {0};
+    gtaio_istream_t personality_content = {0};
     gta_enum_handle_t h_enum = GTA_HANDLE_ENUM_FIRST;
-    gtaio_ostream_t personality_name = { 0 };
-    gta_access_policy_handle_t h_auth = gta_access_policy_simple(framework_test_params->h_inst, GTA_ACCESS_DESCRIPTOR_TYPE_INITIAL, &errinfo);
+    gtaio_ostream_t personality_name = {0};
+    gta_access_policy_handle_t h_auth =
+        gta_access_policy_simple(framework_test_params->h_inst, GTA_ACCESS_DESCRIPTOR_TYPE_INITIAL, &errinfo);
     assert_non_null(h_auth);
-    
 
     /* gta_personality_create */
-    assert_false(gta_personality_create(framework_test_params->h_inst, NULL,
-        NULL, NULL, NULL, NULL, NULL, protection_properties, &errinfo));
+    assert_false(gta_personality_create(
+        framework_test_params->h_inst, NULL, NULL, NULL, NULL, NULL, NULL, protection_properties, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
     /* should fail, because a personality with this name already exists */
-    assert_false(gta_personality_create(framework_test_params->h_inst,
-        "identifier", "personality2", "provider_test", "profile1", h_auth, h_auth,
-        protection_properties, &errinfo));
+    assert_false(gta_personality_create(
+        framework_test_params->h_inst,
+        "identifier",
+        "personality2",
+        "provider_test",
+        "profile1",
+        h_auth,
+        h_auth,
+        protection_properties,
+        &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_NAME_ALREADY_EXISTS);
 
     /* invalid auth handles */
-    assert_false(gta_personality_create(framework_test_params->h_inst,
-        "identifier", "personality2", "provider_test", "profile1", h_auth, GTA_HANDLE_INVALID,
-        protection_properties, &errinfo));
+    assert_false(gta_personality_create(
+        framework_test_params->h_inst,
+        "identifier",
+        "personality2",
+        "provider_test",
+        "profile1",
+        h_auth,
+        GTA_HANDLE_INVALID,
+        protection_properties,
+        &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_ACCESS_POLICY);
 
-    assert_false(gta_personality_create(framework_test_params->h_inst,
-        "identifier", "personality2", "provider_test", "profile1", framework_test_params->h_inst, h_auth,
-        protection_properties, &errinfo));
+    assert_false(gta_personality_create(
+        framework_test_params->h_inst,
+        "identifier",
+        "personality2",
+        "provider_test",
+        "profile1",
+        framework_test_params->h_inst,
+        h_auth,
+        protection_properties,
+        &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_ACCESS_POLICY);
 
-    assert_true(gta_personality_create(framework_test_params->h_inst,
-        "identifier","personality4", "provider_test", "profile1", h_auth, h_auth,
-        protection_properties, &errinfo));
+    assert_true(gta_personality_create(
+        framework_test_params->h_inst,
+        "identifier",
+        "personality4",
+        "provider_test",
+        "profile1",
+        h_auth,
+        h_auth,
+        protection_properties,
+        &errinfo));
 
     /* gta_personality_deploy */
-    assert_false(gta_personality_deploy(framework_test_params->h_inst, NULL,
-        NULL, NULL, NULL, NULL, NULL, NULL, protection_properties, &errinfo));
+    assert_false(gta_personality_deploy(
+        framework_test_params->h_inst, NULL, NULL, NULL, NULL, NULL, NULL, NULL, protection_properties, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
     /* should fail, because a personality with this name already exists */
-    assert_false(gta_personality_deploy(framework_test_params->h_inst,
-        "identifier", "personality2", "provider_test", "profile1",
-        (gtaio_istream_t *)&personality_content, h_auth, h_auth,
-        protection_properties, &errinfo));
+    assert_false(gta_personality_deploy(
+        framework_test_params->h_inst,
+        "identifier",
+        "personality2",
+        "provider_test",
+        "profile1",
+        (gtaio_istream_t *)&personality_content,
+        h_auth,
+        h_auth,
+        protection_properties,
+        &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_NAME_ALREADY_EXISTS);
 
-    assert_true(gta_personality_deploy(framework_test_params->h_inst,
-        "identifier", "personality4", "provider_test", "profile1",
-        (gtaio_istream_t *)&personality_content, h_auth, h_auth,
-        protection_properties, &errinfo));
+    assert_true(gta_personality_deploy(
+        framework_test_params->h_inst,
+        "identifier",
+        "personality4",
+        "provider_test",
+        "profile1",
+        (gtaio_istream_t *)&personality_content,
+        h_auth,
+        h_auth,
+        protection_properties,
+        &errinfo));
 
     /* negative tests for gta_personality_enumerate */
-    assert_false(gta_personality_enumerate(NULL, "identifier1", &h_enum, 99,
-        &personality_name, &errinfo));
+    assert_false(gta_personality_enumerate(NULL, "identifier1", &h_enum, 99, &personality_name, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_false(gta_personality_enumerate(framework_test_params->h_inst,
-        NULL, &h_enum, 99, &personality_name, &errinfo));
+    assert_false(
+        gta_personality_enumerate(framework_test_params->h_inst, NULL, &h_enum, 99, &personality_name, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_enumerate(framework_test_params->h_inst,
-        "identifier1", &h_enum, 99, &personality_name, &errinfo));
+    assert_false(gta_personality_enumerate(
+        framework_test_params->h_inst, "identifier1", &h_enum, 99, &personality_name, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_enumerate(framework_test_params->h_inst,
-        "identifier1", &h_enum, 99, NULL, &errinfo));
+    assert_false(gta_personality_enumerate(framework_test_params->h_inst, "identifier1", &h_enum, 99, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
     /* gta_personality_remove */
@@ -839,8 +838,7 @@ test_gta_personality(void ** state)
     assert_true(gta_personality_activate(framework_test_params->h_ctx, &errinfo));
 }
 
-static void
-test_gta_context_get_provider_params(void ** state)
+static void test_gta_context_get_provider_params(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
@@ -848,12 +846,10 @@ test_gta_context_get_provider_params(void ** state)
     assert_null(gta_context_get_provider_params(NULL, NULL));
     assert_null(gta_context_get_provider_params(NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
-    assert_non_null(gta_context_get_provider_params(framework_test_params->h_ctx,
-        &errinfo));
+    assert_non_null(gta_context_get_provider_params(framework_test_params->h_ctx, &errinfo));
 }
 
-static void
-test_gta_context_get_params(void ** state)
+static void test_gta_context_get_params(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
@@ -861,12 +857,10 @@ test_gta_context_get_params(void ** state)
     assert_null(gta_context_get_params(NULL, NULL));
     assert_null(gta_context_get_params(NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
-    assert_non_null(gta_context_get_params(framework_test_params->h_ctx,
-        &errinfo));
+    assert_non_null(gta_context_get_params(framework_test_params->h_ctx, &errinfo));
 }
 
-static void
-test_gta_provider_get_params(void ** state)
+static void test_gta_provider_get_params(void ** state)
 {
     // struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
@@ -877,90 +871,65 @@ test_gta_provider_get_params(void ** state)
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
     /*
      * This function can only be called from a provider, because of the wrapped
-     * instance handle. We only do negative tests here. 
+     * instance handle. We only do negative tests here.
      *
     assert_non_null(gta_provider_get_params(framework_test_params->h_inst,
         &errinfo));
     */
 }
 
-static void
-test_gta_access_token_get_physical_presence(void ** state)
+static void test_gta_access_token_get_physical_presence(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gta_access_token_t physical_presence_token = { 0 };
+    gta_access_token_t physical_presence_token = {0};
 
-    assert_false(gta_access_token_get_physical_presence(NULL,
-        physical_presence_token,
-        &errinfo));
+    assert_false(gta_access_token_get_physical_presence(NULL, physical_presence_token, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_false(gta_access_token_get_physical_presence(framework_test_params->h_inst,
-        NULL,
-        &errinfo));
+    assert_false(gta_access_token_get_physical_presence(framework_test_params->h_inst, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_true(gta_access_token_get_physical_presence(framework_test_params->h_inst,
-        physical_presence_token,
-        &errinfo));
+    assert_true(
+        gta_access_token_get_physical_presence(framework_test_params->h_inst, physical_presence_token, &errinfo));
 }
 
-static void
-test_gta_access_token_get_issuing(void ** state)
+static void test_gta_access_token_get_issuing(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gta_access_token_t granting_token = { 0 };
+    gta_access_token_t granting_token = {0};
 
-    assert_false(gta_access_token_get_issuing(NULL,
-        granting_token,
-        &errinfo));
+    assert_false(gta_access_token_get_issuing(NULL, granting_token, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_false(gta_access_token_get_issuing(framework_test_params->h_inst,
-        NULL,
-        &errinfo));
+    assert_false(gta_access_token_get_issuing(framework_test_params->h_inst, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_true(gta_access_token_get_issuing(framework_test_params->h_inst,
-        granting_token,
-        &errinfo));
+    assert_true(gta_access_token_get_issuing(framework_test_params->h_inst, granting_token, &errinfo));
 }
 
-static void
-test_gta_access_token_get_basic(void ** state)
+static void test_gta_access_token_get_basic(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gta_access_token_t granting_token = { 0 };
-    gta_access_token_t token = { 0 };
+    gta_access_token_t granting_token = {0};
+    gta_access_token_t token = {0};
 
-    assert_false(gta_access_token_get_basic(NULL,
-        granting_token,
-        "personality_name",
-        GTA_ACCESS_TOKEN_USAGE_USE,
-        token,
-        &errinfo));
+    assert_false(gta_access_token_get_basic(
+        NULL, granting_token, "personality_name", GTA_ACCESS_TOKEN_USAGE_USE, token, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_false(gta_access_token_get_basic(framework_test_params->h_inst,
-        NULL,
-        "personality_name",
-        GTA_ACCESS_TOKEN_USAGE_USE,
-        token,
-        &errinfo));
+    assert_false(gta_access_token_get_basic(
+        framework_test_params->h_inst, NULL, "personality_name", GTA_ACCESS_TOKEN_USAGE_USE, token, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_access_token_get_basic(framework_test_params->h_inst,
-        granting_token,
-        NULL,
-        GTA_ACCESS_TOKEN_USAGE_USE,
-        token,
-        &errinfo));
+    assert_false(gta_access_token_get_basic(
+        framework_test_params->h_inst, granting_token, NULL, GTA_ACCESS_TOKEN_USAGE_USE, token, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_access_token_get_basic(framework_test_params->h_inst,
+    assert_false(gta_access_token_get_basic(
+        framework_test_params->h_inst,
         granting_token,
         "personality_name",
         GTA_ACCESS_TOKEN_USAGE_RECEDE,
@@ -968,7 +937,8 @@ test_gta_access_token_get_basic(void ** state)
         &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_true(gta_access_token_get_basic(framework_test_params->h_inst,
+    assert_true(gta_access_token_get_basic(
+        framework_test_params->h_inst,
         granting_token,
         "personality_name",
         GTA_ACCESS_TOKEN_USAGE_USE,
@@ -976,104 +946,70 @@ test_gta_access_token_get_basic(void ** state)
         &errinfo));
 }
 
-static void
-test_gta_access_token_get_pers_derived(void ** state)
+static void test_gta_access_token_get_pers_derived(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gta_access_token_t token = { 0 };
+    gta_access_token_t token = {0};
 
-    assert_false(gta_access_token_get_pers_derived(NULL,
-        "personality_name",
-        GTA_ACCESS_TOKEN_USAGE_USE,
-        &token,
-        &errinfo));
+    assert_false(
+        gta_access_token_get_pers_derived(NULL, "personality_name", GTA_ACCESS_TOKEN_USAGE_USE, &token, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_false(gta_access_token_get_pers_derived(framework_test_params->h_ctx,
-        NULL,
-        GTA_ACCESS_TOKEN_USAGE_USE,
-        &token,
-        &errinfo));
+    assert_false(gta_access_token_get_pers_derived(
+        framework_test_params->h_ctx, NULL, GTA_ACCESS_TOKEN_USAGE_USE, &token, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_access_token_get_pers_derived(framework_test_params->h_ctx,
-        "personality_name",
-        3,
-        &token,
-        &errinfo));
+    assert_false(
+        gta_access_token_get_pers_derived(framework_test_params->h_ctx, "personality_name", 3, &token, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_access_token_get_pers_derived(framework_test_params->h_ctx,
-        "personality_name",
-        GTA_ACCESS_TOKEN_USAGE_USE,
-        NULL,
-        &errinfo));
+    assert_false(gta_access_token_get_pers_derived(
+        framework_test_params->h_ctx, "personality_name", GTA_ACCESS_TOKEN_USAGE_USE, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_true(gta_access_token_get_pers_derived(framework_test_params->h_ctx,
-        "personality_name",
-        GTA_ACCESS_TOKEN_USAGE_USE,
-        &token,
-        &errinfo));
+    assert_true(gta_access_token_get_pers_derived(
+        framework_test_params->h_ctx, "personality_name", GTA_ACCESS_TOKEN_USAGE_USE, &token, &errinfo));
 
-    assert_true(gta_access_token_get_pers_derived(framework_test_params->h_ctx,
-        NULL,
-        GTA_ACCESS_TOKEN_USAGE_RECEDE,
-        &token,
-        &errinfo));
+    assert_true(gta_access_token_get_pers_derived(
+        framework_test_params->h_ctx, NULL, GTA_ACCESS_TOKEN_USAGE_RECEDE, &token, &errinfo));
 }
 
-static void
-test_gta_access_token_revoke(void ** state)
+static void test_gta_access_token_revoke(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gta_access_token_t token = { 0 };
+    gta_access_token_t token = {0};
 
-    assert_false(gta_access_token_revoke(NULL,
-        token,
-        &errinfo));
+    assert_false(gta_access_token_revoke(NULL, token, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_false(gta_access_token_revoke(framework_test_params->h_inst,
-        NULL,
-        &errinfo));
+    assert_false(gta_access_token_revoke(framework_test_params->h_inst, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_true(gta_access_token_revoke(framework_test_params->h_inst,
-        token,
-        &errinfo));
+    assert_true(gta_access_token_revoke(framework_test_params->h_inst, token, &errinfo));
 }
 
-static void
-test_gta_context_auth_set_access_token(void ** state)
+static void test_gta_context_auth_set_access_token(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gta_access_token_t token = { 0 };
+    gta_access_token_t token = {0};
 
-    assert_false(gta_context_auth_set_access_token(NULL,
-        token,
-        &errinfo));
+    assert_false(gta_context_auth_set_access_token(NULL, token, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_false(gta_context_auth_set_access_token(framework_test_params->h_ctx,
-        NULL,
-        &errinfo));
+    assert_false(gta_context_auth_set_access_token(framework_test_params->h_ctx, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_true(gta_context_auth_set_access_token(framework_test_params->h_ctx,
-        token,
-        &errinfo));
+    assert_true(gta_context_auth_set_access_token(framework_test_params->h_ctx, token, &errinfo));
 }
 
-static void
-test_gta_context_auth_get_challenge(void ** state)
+static void test_gta_context_auth_get_challenge(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gtaio_ostream_t challenge = { 0 };
+    gtaio_ostream_t challenge = {0};
 
     assert_false(gta_context_auth_get_challenge(NULL, NULL, NULL));
 
@@ -1088,12 +1024,11 @@ test_gta_context_auth_get_challenge(void ** state)
     assert_int_equal(errinfo, 0);
 }
 
-static void
-test_gta_context_auth_set_random(void ** state)
+static void test_gta_context_auth_set_random(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gtaio_istream_t random = { 0 };
+    gtaio_istream_t random = {0};
 
     assert_false(gta_context_auth_set_random(NULL, NULL, NULL));
 
@@ -1108,98 +1043,60 @@ test_gta_context_auth_set_random(void ** state)
     assert_int_equal(errinfo, 0);
 }
 
-static void
-test_gta_context_get_attribute(void ** state)
+static void test_gta_context_get_attribute(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gtaio_ostream_t attrvalue = { 0 };
+    gtaio_ostream_t attrvalue = {0};
 
-    assert_false(gta_context_get_attribute(framework_test_params->h_ctx,
-        NULL,
-        NULL,
-        NULL));
+    assert_false(gta_context_get_attribute(framework_test_params->h_ctx, NULL, NULL, NULL));
 
-    assert_false(gta_context_get_attribute(framework_test_params->h_ctx,
-        NULL,
-        NULL,
-        &errinfo));
-        assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
-
-    assert_false(gta_context_get_attribute(framework_test_params->h_ctx,
-        NULL,
-        &attrvalue,
-        &errinfo));
+    assert_false(gta_context_get_attribute(framework_test_params->h_ctx, NULL, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_context_get_attribute(framework_test_params->h_ctx,
-        "attrtype",
-        NULL,
-        &errinfo));
+    assert_false(gta_context_get_attribute(framework_test_params->h_ctx, NULL, &attrvalue, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_context_get_attribute(NULL,
-        "attrtype",
-        &attrvalue,
-        &errinfo));
+    assert_false(gta_context_get_attribute(framework_test_params->h_ctx, "attrtype", NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_context_get_attribute(NULL, "attrtype", &attrvalue, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_true(gta_context_get_attribute(framework_test_params->h_ctx,
-        "attrtype",
-        &attrvalue,
-        &errinfo));
+    assert_true(gta_context_get_attribute(framework_test_params->h_ctx, "attrtype", &attrvalue, &errinfo));
 }
 
-static void
-test_gta_context_set_attribute(void ** state)
+static void test_gta_context_set_attribute(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gtaio_istream_t attrvalue = { 0 };
+    gtaio_istream_t attrvalue = {0};
 
-    assert_false(gta_context_set_attribute(framework_test_params->h_ctx,
-        NULL,
-        NULL,
-        NULL));
+    assert_false(gta_context_set_attribute(framework_test_params->h_ctx, NULL, NULL, NULL));
 
-    assert_false(gta_context_set_attribute(framework_test_params->h_ctx,
-        NULL,
-        NULL,
-        &errinfo));
+    assert_false(gta_context_set_attribute(framework_test_params->h_ctx, NULL, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_context_set_attribute(framework_test_params->h_ctx,
-        NULL,
-        &attrvalue,
-        &errinfo));
+    assert_false(gta_context_set_attribute(framework_test_params->h_ctx, NULL, &attrvalue, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_context_set_attribute(framework_test_params->h_ctx,
-        "attrtype",
-        NULL,
-        &errinfo));
+    assert_false(gta_context_set_attribute(framework_test_params->h_ctx, "attrtype", NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_context_set_attribute(NULL,
-        "attrtype",
-        &attrvalue,
-        &errinfo));
+    assert_false(gta_context_set_attribute(NULL, "attrtype", &attrvalue, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_true(gta_context_set_attribute(framework_test_params->h_ctx,
-        "attrtype",
-        &attrvalue,
-        &errinfo));
+    assert_true(gta_context_set_attribute(framework_test_params->h_ctx, "attrtype", &attrvalue, &errinfo));
 }
 
-static void
-test_gta_devicestate_transition(void ** state)
+static void test_gta_devicestate_transition(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
     gta_access_policy_handle_t h_auth_recede = GTA_HANDLE_INVALID;
 
-    h_auth_recede = gta_access_policy_simple(framework_test_params->h_inst, GTA_ACCESS_DESCRIPTOR_TYPE_PHYSICAL_PRESENCE_TOKEN, &errinfo);
+    h_auth_recede = gta_access_policy_simple(
+        framework_test_params->h_inst, GTA_ACCESS_DESCRIPTOR_TYPE_PHYSICAL_PRESENCE_TOKEN, &errinfo);
     assert_non_null(h_auth_recede);
 
     assert_false(gta_devicestate_transition(framework_test_params->h_inst, h_auth_recede, 0, NULL));
@@ -1213,12 +1110,11 @@ test_gta_devicestate_transition(void ** state)
     assert_true(gta_devicestate_transition(framework_test_params->h_inst, h_auth_recede, 0, &errinfo));
 }
 
-static void
-test_gta_devicestate_recede(void ** state)
+static void test_gta_devicestate_recede(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gta_access_token_t recede_token = { 0 };
+    gta_access_token_t recede_token = {0};
 
     assert_false(gta_devicestate_recede(framework_test_params->h_inst, recede_token, NULL));
 
@@ -1230,83 +1126,43 @@ test_gta_devicestate_recede(void ** state)
     assert_true(gta_devicestate_recede(framework_test_params->h_inst, recede_token, &errinfo));
 }
 
-static void
-test_gta_devicestate_attestate(void ** state)
-{
-    /* todo */
-}
+static void test_gta_devicestate_attestate(void ** state) { /* todo */ }
 
-static void
-test_gta_personality_enumerate_application(void ** state)
+static void test_gta_personality_enumerate_application(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gtaio_ostream_t personality_name = { 0 };
+    gtaio_ostream_t personality_name = {0};
     bool b_loop = true;
     gta_enum_handle_t h_enum = GTA_HANDLE_ENUM_FIRST;
 
-    assert_false(gta_personality_enumerate_application(framework_test_params->h_inst,
-        NULL,
-        NULL,
-        99,
-        NULL,
-        NULL));
+    assert_false(gta_personality_enumerate_application(framework_test_params->h_inst, NULL, NULL, 99, NULL, NULL));
 
-    assert_false(gta_personality_enumerate_application(framework_test_params->h_inst,
-        NULL,
-        NULL,
-        99,
-        NULL,
-        &errinfo));
+    assert_false(gta_personality_enumerate_application(framework_test_params->h_inst, NULL, NULL, 99, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_enumerate_application(NULL,
-        "application",
-        &h_enum,
-        99,
-        &personality_name,
-        &errinfo));
+    assert_false(gta_personality_enumerate_application(NULL, "application", &h_enum, 99, &personality_name, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_false(gta_personality_enumerate_application(framework_test_params->h_inst,
-        NULL,
-        &h_enum,
-        99,
-        &personality_name,
-        &errinfo));
+    assert_false(gta_personality_enumerate_application(
+        framework_test_params->h_inst, NULL, &h_enum, 99, &personality_name, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_enumerate_application(framework_test_params->h_inst,
-        "application",
-        NULL,
-        99,
-        &personality_name,
-        &errinfo));
+    assert_false(gta_personality_enumerate_application(
+        framework_test_params->h_inst, "application", NULL, 99, &personality_name, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_enumerate_application(framework_test_params->h_inst,
-        "application",
-        &h_enum,
-        99,
-        NULL,
-        &errinfo));
+    assert_false(gta_personality_enumerate_application(
+        framework_test_params->h_inst, "application", &h_enum, 99, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_enumerate_application(framework_test_params->h_inst,
-        "application",
-        &h_enum,
-        99,
-        &personality_name,
-        &errinfo));
+    assert_false(gta_personality_enumerate_application(
+        framework_test_params->h_inst, "application", &h_enum, 99, &personality_name, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    while(b_loop) {
-        if (!gta_personality_enumerate_application(framework_test_params->h_inst,
-            "application",
-            &h_enum,
-            1,
-            &personality_name,
-            &errinfo)) {
+    while (b_loop) {
+        if (!gta_personality_enumerate_application(
+                framework_test_params->h_inst, "application", &h_enum, 1, &personality_name, &errinfo)) {
 
             assert_int_equal(GTA_ERROR_ENUM_NO_MORE_ITEMS, errinfo);
             b_loop = false;
@@ -1314,315 +1170,175 @@ test_gta_personality_enumerate_application(void ** state)
     }
 }
 
-static void
-test_gta_personality_enroll(void ** state)
+static void test_gta_personality_enroll(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gtaio_ostream_t enrollment_info = { 0 };
+    gtaio_ostream_t enrollment_info = {0};
 
-    assert_false(gta_personality_enroll(framework_test_params->h_ctx,
-        NULL,
-        NULL));
+    assert_false(gta_personality_enroll(framework_test_params->h_ctx, NULL, NULL));
 
-    assert_false(gta_personality_enroll(framework_test_params->h_ctx,
-        NULL,
-        &errinfo));
+    assert_false(gta_personality_enroll(framework_test_params->h_ctx, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_enroll(NULL,
-        &enrollment_info,
-        &errinfo));
+    assert_false(gta_personality_enroll(NULL, &enrollment_info, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_true(gta_personality_enroll(framework_test_params->h_ctx,
-        &enrollment_info,
-        &errinfo));
+    assert_true(gta_personality_enroll(framework_test_params->h_ctx, &enrollment_info, &errinfo));
 }
 
-static void
-test_gta_personality_enroll_auth(void ** state)
-{
-    /* todo */
-}
+static void test_gta_personality_enroll_auth(void ** state) { /* todo */ }
 
-static void
-test_gta_personality_attestate(void ** state)
-{
-    /* todo */
-}
+static void test_gta_personality_attestate(void ** state) { /* todo */ }
 
-static void
-test_gta_personality_remove(void ** state)
-{
-    /* todo */
-}
+static void test_gta_personality_remove(void ** state) { /* todo */ }
 
-static void
-test_gta_personality_deactivate(void ** state)
-{
-    /* todo */
-}
+static void test_gta_personality_deactivate(void ** state) { /* todo */ }
 
-static void
-test_gta_personality_activate(void ** state)
-{
-    /* todo */
-}
+static void test_gta_personality_activate(void ** state) { /* todo */ }
 
-static void
-test_gta_personality_add_trusted_attribute(void ** state)
+static void test_gta_personality_add_trusted_attribute(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gtaio_istream_t attrvalue = { 0 };
+    gtaio_istream_t attrvalue = {0};
 
-    assert_false(gta_personality_add_trusted_attribute(framework_test_params->h_ctx,
-        NULL,
-        NULL,
-        NULL,
-        NULL));
+    assert_false(gta_personality_add_trusted_attribute(framework_test_params->h_ctx, NULL, NULL, NULL, NULL));
 
-    assert_false(gta_personality_add_trusted_attribute(framework_test_params->h_ctx,
-        NULL,
-        NULL,
-        NULL,
-        &errinfo));
+    assert_false(gta_personality_add_trusted_attribute(framework_test_params->h_ctx, NULL, NULL, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_add_trusted_attribute(NULL,
-        "attrtype",
-        "attrname",
-        &attrvalue,
-        &errinfo));
+    assert_false(gta_personality_add_trusted_attribute(NULL, "attrtype", "attrname", &attrvalue, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_true(gta_personality_add_trusted_attribute(framework_test_params->h_ctx,
-        "attrtype",
-        "attrname",
-        &attrvalue,
-        &errinfo));
+    assert_true(gta_personality_add_trusted_attribute(
+        framework_test_params->h_ctx, "attrtype", "attrname", &attrvalue, &errinfo));
 }
 
-static void
-test_gta_personality_add_attribute(void ** state)
+static void test_gta_personality_add_attribute(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gtaio_istream_t attrvalue = { 0 };
+    gtaio_istream_t attrvalue = {0};
 
-    assert_false(gta_personality_add_attribute(framework_test_params->h_ctx,
-        NULL,
-        NULL,
-        NULL,
-        NULL));
+    assert_false(gta_personality_add_attribute(framework_test_params->h_ctx, NULL, NULL, NULL, NULL));
 
-    assert_false(gta_personality_add_attribute(framework_test_params->h_ctx,
-        NULL,
-        NULL,
-        NULL,
-        &errinfo));
+    assert_false(gta_personality_add_attribute(framework_test_params->h_ctx, NULL, NULL, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_add_attribute(NULL,
-        "attrtype",
-        "attrname",
-        &attrvalue,
-        &errinfo));
+    assert_false(gta_personality_add_attribute(NULL, "attrtype", "attrname", &attrvalue, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_true(gta_personality_add_attribute(framework_test_params->h_ctx,
-        "attrtype",
-        "attrname",
-        &attrvalue,
-        &errinfo));
+    assert_true(
+        gta_personality_add_attribute(framework_test_params->h_ctx, "attrtype", "attrname", &attrvalue, &errinfo));
 }
 
-static void
-test_gta_personality_get_attribute(void ** state)
+static void test_gta_personality_get_attribute(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gtaio_ostream_t attrvalue = { 0 };
+    gtaio_ostream_t attrvalue = {0};
 
-    assert_false(gta_personality_get_attribute(framework_test_params->h_ctx,
-        NULL,
-        NULL,
-        NULL));
+    assert_false(gta_personality_get_attribute(framework_test_params->h_ctx, NULL, NULL, NULL));
 
-    assert_false(gta_personality_get_attribute(framework_test_params->h_ctx,
-        NULL,
-        NULL,
-        &errinfo));
+    assert_false(gta_personality_get_attribute(framework_test_params->h_ctx, NULL, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_get_attribute(NULL,
-        "attrname",
-        &attrvalue,
-        &errinfo));
+    assert_false(gta_personality_get_attribute(NULL, "attrname", &attrvalue, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_true(gta_personality_get_attribute(framework_test_params->h_ctx,
-        "attrname",
-        &attrvalue,
-        &errinfo));
+    assert_true(gta_personality_get_attribute(framework_test_params->h_ctx, "attrname", &attrvalue, &errinfo));
 }
 
-static void
-test_gta_personality_remove_attribute(void ** state)
+static void test_gta_personality_remove_attribute(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
 
-    assert_false(gta_personality_remove_attribute(framework_test_params->h_ctx,
-        NULL,
-        NULL));
+    assert_false(gta_personality_remove_attribute(framework_test_params->h_ctx, NULL, NULL));
 
-    assert_false(gta_personality_remove_attribute(framework_test_params->h_ctx,
-        NULL,
-        &errinfo));
+    assert_false(gta_personality_remove_attribute(framework_test_params->h_ctx, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_remove_attribute(NULL,
-        "attrname",
-        &errinfo));
+    assert_false(gta_personality_remove_attribute(NULL, "attrname", &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_true(gta_personality_remove_attribute(framework_test_params->h_ctx,
-        "attrname",
-        &errinfo));
+    assert_true(gta_personality_remove_attribute(framework_test_params->h_ctx, "attrname", &errinfo));
 }
 
-static void
-test_gta_personality_deactivate_attribute(void ** state)
+static void test_gta_personality_deactivate_attribute(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
 
-    assert_false(gta_personality_deactivate_attribute(framework_test_params->h_ctx,
-        NULL,
-        NULL));
+    assert_false(gta_personality_deactivate_attribute(framework_test_params->h_ctx, NULL, NULL));
 
-    assert_false(gta_personality_deactivate_attribute(framework_test_params->h_ctx,
-        NULL,
-        &errinfo));
+    assert_false(gta_personality_deactivate_attribute(framework_test_params->h_ctx, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_deactivate_attribute(NULL,
-        "attrname",
-        &errinfo));
+    assert_false(gta_personality_deactivate_attribute(NULL, "attrname", &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_true(gta_personality_deactivate_attribute(framework_test_params->h_ctx,
-        "attrname",
-        &errinfo));
+    assert_true(gta_personality_deactivate_attribute(framework_test_params->h_ctx, "attrname", &errinfo));
 }
 
-static void
-test_gta_personality_activate_attribute(void ** state)
+static void test_gta_personality_activate_attribute(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
 
-    assert_false(gta_personality_activate_attribute(framework_test_params->h_ctx,
-        NULL,
-        NULL));
+    assert_false(gta_personality_activate_attribute(framework_test_params->h_ctx, NULL, NULL));
 
-    assert_false(gta_personality_activate_attribute(framework_test_params->h_ctx,
-        NULL,
-        &errinfo));
+    assert_false(gta_personality_activate_attribute(framework_test_params->h_ctx, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_activate_attribute(NULL,
-        "attrname",
-        &errinfo));
+    assert_false(gta_personality_activate_attribute(NULL, "attrname", &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_true(gta_personality_activate_attribute(framework_test_params->h_ctx,
-        "attrname",
-        &errinfo));
+    assert_true(gta_personality_activate_attribute(framework_test_params->h_ctx, "attrname", &errinfo));
 }
 
-static void
-test_gta_personality_attributes_enumerate(void ** state)
+static void test_gta_personality_attributes_enumerate(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gtaio_ostream_t attribute_type = { 0 };
-    gtaio_ostream_t attribute_name = { 0 };
+    gtaio_ostream_t attribute_type = {0};
+    gtaio_ostream_t attribute_name = {0};
     bool b_loop = true;
     gta_enum_handle_t h_enum = GTA_HANDLE_ENUM_FIRST;
 
-    assert_false(gta_personality_attributes_enumerate(framework_test_params->h_inst,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL));
+    assert_false(gta_personality_attributes_enumerate(framework_test_params->h_inst, NULL, NULL, NULL, NULL, NULL));
 
-    assert_false(gta_personality_attributes_enumerate(framework_test_params->h_inst,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        &errinfo));
+    assert_false(gta_personality_attributes_enumerate(framework_test_params->h_inst, NULL, NULL, NULL, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_attributes_enumerate(NULL,
-        "personality",
-        &h_enum,
-        &attribute_type,
-        &attribute_name,
-        &errinfo));
+    assert_false(
+        gta_personality_attributes_enumerate(NULL, "personality", &h_enum, &attribute_type, &attribute_name, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_false(gta_personality_attributes_enumerate(framework_test_params->h_inst,
-        NULL,
-        &h_enum,
-        &attribute_type,
-        &attribute_name,
-        &errinfo));
+    assert_false(gta_personality_attributes_enumerate(
+        framework_test_params->h_inst, NULL, &h_enum, &attribute_type, &attribute_name, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_attributes_enumerate(framework_test_params->h_inst,
-        "personality",
-        NULL,
-        &attribute_type,
-        &attribute_name,
-        &errinfo));
+    assert_false(gta_personality_attributes_enumerate(
+        framework_test_params->h_inst, "personality", NULL, &attribute_type, &attribute_name, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_attributes_enumerate(framework_test_params->h_inst,
-        "personality",
-        &h_enum,
-        NULL,
-        &attribute_name,
-        &errinfo));
+    assert_false(gta_personality_attributes_enumerate(
+        framework_test_params->h_inst, "personality", &h_enum, NULL, &attribute_name, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_attributes_enumerate(framework_test_params->h_inst,
-        "personality",
-        &h_enum,
-        &attribute_type,
-        NULL,
-        &errinfo));
+    assert_false(gta_personality_attributes_enumerate(
+        framework_test_params->h_inst, "personality", &h_enum, &attribute_type, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_personality_attributes_enumerate(framework_test_params->h_inst,
-        "personality",
-        &h_enum,
-        &attribute_type,
-        &attribute_name,
-        &errinfo));
+    assert_false(gta_personality_attributes_enumerate(
+        framework_test_params->h_inst, "personality", &h_enum, &attribute_type, &attribute_name, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_ITEM_NOT_FOUND);
 
-    while(b_loop) {
-        if (!gta_personality_attributes_enumerate(framework_test_params->h_inst,
-            "personality1",
-            &h_enum,
-            &attribute_type,
-            &attribute_name,
-            &errinfo)) {
+    while (b_loop) {
+        if (!gta_personality_attributes_enumerate(
+                framework_test_params->h_inst, "personality1", &h_enum, &attribute_type, &attribute_name, &errinfo)) {
 
             assert_int_equal(GTA_ERROR_ENUM_NO_MORE_ITEMS, errinfo);
             b_loop = false;
@@ -1630,293 +1346,248 @@ test_gta_personality_attributes_enumerate(void ** state)
     }
 }
 
-static void
-test_gta_seal_data(void ** state)
+static void test_gta_seal_data(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gtaio_istream_t data = { 0 };
-    gtaio_ostream_t protected_data = { 0 };
+    gtaio_istream_t data = {0};
+    gtaio_ostream_t protected_data = {0};
 
-    assert_false(gta_seal_data(framework_test_params->h_ctx,
-        NULL,
-        NULL,
-        NULL));
+    assert_false(gta_seal_data(framework_test_params->h_ctx, NULL, NULL, NULL));
 
-    assert_false(gta_seal_data(framework_test_params->h_ctx,
-        NULL,
-        NULL,
-        &errinfo));
+    assert_false(gta_seal_data(framework_test_params->h_ctx, NULL, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_seal_data(NULL,
-        &data,
-        &protected_data,
-        &errinfo));
+    assert_false(gta_seal_data(NULL, &data, &protected_data, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_true(gta_seal_data(framework_test_params->h_ctx,
-        &data,
-        &protected_data,
-        &errinfo));
+    assert_true(gta_seal_data(framework_test_params->h_ctx, &data, &protected_data, &errinfo));
 }
 
-static void
-test_gta_unseal_data(void ** state)
+static void test_gta_unseal_data(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gtaio_istream_t protected_data = { 0 };
-    gtaio_ostream_t data = { 0 };
+    gtaio_istream_t protected_data = {0};
+    gtaio_ostream_t data = {0};
 
-    assert_false(gta_unseal_data(framework_test_params->h_ctx,
-        NULL,
-        NULL,
-        NULL));
+    assert_false(gta_unseal_data(framework_test_params->h_ctx, NULL, NULL, NULL));
 
-    assert_false(gta_unseal_data(framework_test_params->h_ctx,
-        NULL,
-        NULL,
-        &errinfo));
+    assert_false(gta_unseal_data(framework_test_params->h_ctx, NULL, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_unseal_data(NULL,
-        &protected_data,
-        &data,
-        &errinfo));
+    assert_false(gta_unseal_data(NULL, &protected_data, &data, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_true(gta_unseal_data(framework_test_params->h_ctx,
-        &protected_data,
-        &data,
-        &errinfo));
+    assert_true(gta_unseal_data(framework_test_params->h_ctx, &protected_data, &data, &errinfo));
 }
 
-static void
-test_gta_verify(void ** state)
+static void test_gta_verify(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gtaio_istream_t claim = { 0 };
+    gtaio_istream_t claim = {0};
 
-    assert_false(gta_verify(framework_test_params->h_ctx,
-        NULL,
-        NULL));
+    assert_false(gta_verify(framework_test_params->h_ctx, NULL, NULL));
 
-    assert_false(gta_verify(framework_test_params->h_ctx,
-        NULL,
-        &errinfo));
+    assert_false(gta_verify(framework_test_params->h_ctx, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_false(gta_verify(NULL,
-        &claim,
-        &errinfo));
+    assert_false(gta_verify(NULL, &claim, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-    assert_true(gta_verify(framework_test_params->h_ctx,
-        &claim,
-        &errinfo));
+    assert_true(gta_verify(framework_test_params->h_ctx, &claim, &errinfo));
 }
 
-static void
-test_gta_authenticate_data_detached(void ** state)
+static void test_gta_authenticate_data_detached(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gtaio_istream_t data = { 0 };
-    gtaio_ostream_t seal = { 0 };
+    gtaio_istream_t data = {0};
+    gtaio_ostream_t seal = {0};
 
-    assert_false(gta_authenticate_data_detached(framework_test_params->h_ctx,
-        &data, &seal, NULL));
+    assert_false(gta_authenticate_data_detached(framework_test_params->h_ctx, &data, &seal, NULL));
     assert_false(gta_authenticate_data_detached(NULL, &data, &seal, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
-    assert_false(gta_authenticate_data_detached(framework_test_params->h_ctx,
-        NULL, &seal, &errinfo));
+    assert_false(gta_authenticate_data_detached(framework_test_params->h_ctx, NULL, &seal, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_true(gta_authenticate_data_detached(framework_test_params->h_ctx,
-        &data, &seal, &errinfo));
+    assert_true(gta_authenticate_data_detached(framework_test_params->h_ctx, &data, &seal, &errinfo));
 }
 
-static void
-test_gta_verify_data_detached(void ** state)
+static void test_gta_verify_data_detached(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    gtaio_istream_t data = { 0 };
-    gtaio_istream_t seal = { 0 };
+    gtaio_istream_t data = {0};
+    gtaio_istream_t seal = {0};
 
-    assert_false(gta_verify_data_detached(framework_test_params->h_ctx,
-        &data, &seal, NULL));
+    assert_false(gta_verify_data_detached(framework_test_params->h_ctx, &data, &seal, NULL));
     assert_false(gta_verify_data_detached(NULL, &data, &seal, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
-    assert_false(gta_verify_data_detached(framework_test_params->h_ctx,
-        NULL, &seal, &errinfo));
+    assert_false(gta_verify_data_detached(framework_test_params->h_ctx, NULL, &seal, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
-    assert_false(gta_verify_data_detached(framework_test_params->h_ctx,
-        &data, NULL, &errinfo));
+    assert_false(gta_verify_data_detached(framework_test_params->h_ctx, &data, NULL, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-    assert_true(gta_verify_data_detached(framework_test_params->h_ctx,
-        &data, &seal, &errinfo));
+    assert_true(gta_verify_data_detached(framework_test_params->h_ctx, &data, &seal, &errinfo));
 }
 
-static void
-test_gta_security_association_initialize(void ** state)
-{
-    /* todo */
-}
+static void test_gta_security_association_initialize(void ** state) { /* todo */ }
 
-static void
-test_gta_security_association_accept(void ** state)
-{
-    /* todo */
-}
+static void test_gta_security_association_accept(void ** state) { /* todo */ }
 
-static void
-test_gta_security_association_destroy(void ** state)
-{
-    /* todo */
-}
+static void test_gta_security_association_destroy(void ** state) { /* todo */ }
 
-static void
-test_gta_seal_message(void ** state)
-{
-    /* todo */
-}
+static void test_gta_seal_message(void ** state) { /* todo */ }
 
-static void
-test_gta_unseal_message(void ** state)
-{
-    /* todo */
-}
+static void test_gta_unseal_message(void ** state) { /* todo */ }
 
-static void
-test_gta_get_random_bytes(void ** state)
-{
-    /* todo */
-}
+static void test_gta_get_random_bytes(void ** state) { /* todo */ }
 
-static void
-test_gta_trustex_function_install(void ** state)
-{
-    /* todo */
-}
+static void test_gta_trustex_function_install(void ** state) { /* todo */ }
 
-static void
-test_gta_trustex_function_uninstall(void ** state)
-{
-    /* todo */
-}
+static void test_gta_trustex_function_uninstall(void ** state) { /* todo */ }
 
-static void
-test_gta_trustex_function_execute(void ** state)
-{
-    /* todo */
-}
+static void test_gta_trustex_function_execute(void ** state) { /* todo */ }
 
-static void
-test_gta_trustex_function_terminate(void ** state)
-{
-    /* todo */
-}
+static void test_gta_trustex_function_terminate(void ** state) { /* todo */ }
 
-static void
-test_gta_identifier_assign_wo_provider(void ** state)
+static void test_gta_identifier_assign_wo_provider(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
 
-    assert_false(gta_identifier_assign(framework_test_params->h_inst,
-        "identifier_type", "identifier4", &errinfo));
+    assert_false(gta_identifier_assign(framework_test_params->h_inst, "identifier_type", "identifier4", &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
 }
 
-static void
-test_gta_identifier_enumerate_wo_provider(void ** state)
+static void test_gta_identifier_enumerate_wo_provider(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
     gta_enum_handle_t h_enum = GTA_HANDLE_ENUM_FIRST;
-    gtaio_ostream_t identifier_type = { 0 };
-    gtaio_ostream_t identifier_value = { 0 };
+    gtaio_ostream_t identifier_type = {0};
+    gtaio_ostream_t identifier_value = {0};
 
-    assert_false(gta_identifier_enumerate(framework_test_params->h_inst,
-        &h_enum, &identifier_type, &identifier_value, &errinfo));
+    assert_false(gta_identifier_enumerate(
+        framework_test_params->h_inst, &h_enum, &identifier_type, &identifier_value, &errinfo));
     assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
 }
 
-static void
-test_gta_personality_create_wo_provider(void ** state)
+static void test_gta_personality_create_wo_provider(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
     gta_errinfo_t errinfo = 0;
-    struct gta_protection_properties_t protection_properties = { 0 };
-    gta_access_policy_handle_t h_auth = gta_access_policy_simple(framework_test_params->h_inst, GTA_ACCESS_DESCRIPTOR_TYPE_INITIAL, &errinfo);
+    struct gta_protection_properties_t protection_properties = {0};
+    gta_access_policy_handle_t h_auth =
+        gta_access_policy_simple(framework_test_params->h_inst, GTA_ACCESS_DESCRIPTOR_TYPE_INITIAL, &errinfo);
     assert_non_null(h_auth);
 
-    assert_false(gta_personality_create(framework_test_params->h_inst,
-        "identifier4", "personality4", "application", "profile1", h_auth, h_auth,
-        protection_properties, &errinfo));
-    assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
-}
-
-static void
-test_gta_personality_deploy_wo_provider(void ** state)
-{
-    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
-    gta_errinfo_t errinfo = 0;
-    struct gta_protection_properties_t protection_properties = { 0 };
-    gtaio_istream_t personality_content = { 0 };
-    gta_access_policy_handle_t h_auth = gta_access_policy_simple(framework_test_params->h_inst, GTA_ACCESS_DESCRIPTOR_TYPE_INITIAL, &errinfo);
-    assert_non_null(h_auth);
-
-    assert_false(gta_personality_deploy(framework_test_params->h_inst,
-        "identifier4", "personality4", "application", "profile1",
-        (gtaio_istream_t *)&personality_content, h_auth, h_auth,
-        protection_properties, &errinfo));
-    assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
-}
-
-static void
-test_gta_personality_enumerate_wo_provider(void ** state)
-{
-    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
-    gta_errinfo_t errinfo = 0;
-    gta_enum_handle_t h_enum = GTA_HANDLE_ENUM_FIRST;
-    gtaio_ostream_t personality_name = { 0 };
-
-    assert_false(gta_personality_enumerate(framework_test_params->h_inst,
-        "identifier4", &h_enum, GTA_PERSONALITY_ENUM_ALL, &personality_name,
-        &errinfo));
-    assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
-}
-
-static void
-test_gta_personality_enumerate_application_wo_provider(void ** state)
-{
-    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
-    gta_errinfo_t errinfo = 0;
-    gta_enum_handle_t h_enum = GTA_HANDLE_ENUM_FIRST;
-    gtaio_ostream_t personality_name = { 0 };
-
-    assert_false(gta_personality_enumerate_application(framework_test_params->h_inst,
-        "application", &h_enum, GTA_PERSONALITY_ENUM_ALL, &personality_name,
-        &errinfo));
-    assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
-}
-
-static void
-test_gta_context_open_wo_provider(void ** state)
-{
-    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
-    gta_errinfo_t errinfo = 0;
-
-    framework_test_params->h_ctx = gta_context_open(framework_test_params->h_inst,
-        "personality2",
+    assert_false(gta_personality_create(
+        framework_test_params->h_inst,
+        "identifier4",
+        "personality4",
+        "application",
         "profile1",
-        &errinfo);
+        h_auth,
+        h_auth,
+        protection_properties,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
+}
+
+static void test_gta_personality_deploy_wo_provider(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    struct gta_protection_properties_t protection_properties = {0};
+    gtaio_istream_t personality_content = {0};
+    gta_access_policy_handle_t h_auth =
+        gta_access_policy_simple(framework_test_params->h_inst, GTA_ACCESS_DESCRIPTOR_TYPE_INITIAL, &errinfo);
+    assert_non_null(h_auth);
+
+    assert_false(gta_personality_deploy(
+        framework_test_params->h_inst,
+        "identifier4",
+        "personality4",
+        "application",
+        "profile1",
+        (gtaio_istream_t *)&personality_content,
+        h_auth,
+        h_auth,
+        protection_properties,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
+}
+
+static void test_gta_personality_enumerate_wo_provider(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gta_enum_handle_t h_enum = GTA_HANDLE_ENUM_FIRST;
+    gtaio_ostream_t personality_name = {0};
+
+    assert_false(gta_personality_enumerate(
+        framework_test_params->h_inst, "identifier4", &h_enum, GTA_PERSONALITY_ENUM_ALL, &personality_name, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
+}
+
+static void test_gta_personality_enumerate_application_wo_provider(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gta_enum_handle_t h_enum = GTA_HANDLE_ENUM_FIRST;
+    gtaio_ostream_t personality_name = {0};
+
+    assert_false(gta_personality_enumerate_application(
+        framework_test_params->h_inst, "application", &h_enum, GTA_PERSONALITY_ENUM_ALL, &personality_name, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
+}
+
+static void test_gta_context_open_wo_provider(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+
+    framework_test_params->h_ctx =
+        gta_context_open(framework_test_params->h_inst, "personality2", "profile1", &errinfo);
     assert_null(framework_test_params->h_ctx);
+}
+
+static void test_gta_list(void ** state)
+{
+    /* Define a list item */
+    struct test_list_item_t {
+        struct test_list_item_t * p_next;
+    };
+
+    /* Setup an empty list */
+    struct test_list_item_t * test_list = NULL;
+
+    /* Declare a few list items */
+    struct test_list_item_t test_list_item_1 = {0};
+    struct test_list_item_t test_list_item_2 = {0};
+    struct test_list_item_t test_list_item_3 = {0};
+
+    assert_int_equal(0, list_cnt((struct list_t *)test_list));
+    list_append_front((struct list_t **)&test_list, &test_list_item_1);
+    list_append_front((struct list_t **)&test_list, &test_list_item_2);
+    list_append((struct list_t **)&test_list, &test_list_item_3);
+
+    assert_ptr_equal(&test_list_item_2, list_get((struct list_t *)test_list, 1));
+    assert_ptr_equal(&test_list_item_1, list_get((struct list_t *)test_list, 2));
+    assert_ptr_equal(&test_list_item_3, list_get((struct list_t *)test_list, 3));
+    assert_null(list_get((struct list_t *)test_list, 4));
+    assert_null(list_get((struct list_t *)test_list, 5));
+    assert_int_equal(3, list_cnt((struct list_t *)test_list));
+
+    assert_ptr_equal(&test_list_item_2, list_remove_front((struct list_t **)&test_list));
+    assert_ptr_equal(&test_list_item_1, list_remove_front((struct list_t **)&test_list));
+    assert_ptr_equal(&test_list_item_3, list_remove_front((struct list_t **)&test_list));
+    assert_null(list_remove_front((struct list_t **)&test_list));
+
+    list_append((struct list_t **)&test_list, &test_list_item_1);
 }
 
 int ts_framework(void)
@@ -1975,9 +1646,7 @@ int ts_framework(void)
         cmocka_unit_test(test_gta_trustex_function_terminate),
     };
 
-    return cmocka_run_group_tests( tests_framework,
-                   init_suite_framework,
-                   clean_suite_framework);
+    return cmocka_run_group_tests(tests_framework, init_suite_framework, clean_suite_framework);
 }
 
 int framework_exceptions(void)
@@ -1992,9 +1661,16 @@ int framework_exceptions(void)
         cmocka_unit_test(test_gta_context_open_wo_provider),
     };
 
-    return cmocka_run_group_tests( tests_framework_exceptions,
-                   init_suite_framework_exceptions,
-                   clean_suite_framework);
+    return cmocka_run_group_tests(tests_framework_exceptions, init_suite_framework_exceptions, clean_suite_framework);
+}
+
+int framework_utils(void)
+{
+    const struct CMUnitTest tests_framework_utils[] = {
+        cmocka_unit_test(test_gta_list),
+    };
+
+    return cmocka_run_group_tests(tests_framework_utils, NULL, NULL);
 }
 
 int main(void)
@@ -2002,5 +1678,6 @@ int main(void)
     int result = 0;
     result |= ts_framework();
     result |= framework_exceptions();
+    result |= framework_utils();
     return result;
 }

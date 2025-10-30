@@ -1,7 +1,8 @@
-/* SPDX-License-Identifier: Apache-2.0 */
-/**********************************************************************
- * Copyright (c) 2024, Siemens AG
- **********************************************************************/
+/*
+ * SPDX-FileCopyrightText: Copyright 2024 Siemens
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 /*
  * Re-implementation of memset_s from the C11 Standard / Annex K
  *
@@ -44,17 +45,16 @@
  */
 #include "gta_memset.h"
 
-errno_t gta_memset(void *s, rsize_t smax, int c, rsize_t n)
+errno_t gta_memset(void * s, rsize_t smax, int c, rsize_t n)
 {
     errno_t ret = EINVAL;
     rsize_t lim = 0;
     unsigned char v;
-    volatile unsigned char *dst;
+    volatile unsigned char * dst;
 
     if (n < smax) {
         lim = n;
-    }
-    else {
+    } else {
         lim = smax;
     }
 
@@ -71,4 +71,3 @@ errno_t gta_memset(void *s, rsize_t smax, int c, rsize_t n)
     }
     return ret;
 }
-
