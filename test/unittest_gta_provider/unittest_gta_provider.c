@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2024-2025 Siemens
+ * SPDX-FileCopyrightText: Copyright 2024-2026 Siemens
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -180,8 +180,6 @@ GTA_DEFINE_FUNCTION(
     }
 #endif
 
-    /* ... */
-
     return ret;
 }
 
@@ -190,13 +188,7 @@ GTA_DEFINE_FUNCTION(
     unittest_provider_gta_provider_context_close,
     (gta_context_handle_t h_ctx, gta_errinfo_t * p_errinfo))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 GTA_DEFINE_FUNCTION(
@@ -223,13 +215,7 @@ GTA_DEFINE_FUNCTION(
     unittest_provider_gta_devicestate_attestate,
     (gta_context_handle_t h_context, gtaio_istream_t * nonce, gtaio_ostream_t * attestation, gta_errinfo_t * p_errinfo))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 GTA_DEFINE_FUNCTION(
@@ -416,13 +402,7 @@ GTA_DEFINE_FUNCTION(
      gtaio_ostream_t * p_personality_enrollment_info,
      gta_errinfo_t * p_errinfo))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 GTA_DEFINE_FUNCTION(
@@ -434,13 +414,7 @@ GTA_DEFINE_FUNCTION(
      gtaio_ostream_t * p_attestation_data,
      gta_errinfo_t * p_errinfo))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 GTA_DEFINE_FUNCTION(
@@ -607,13 +581,7 @@ GTA_DEFINE_FUNCTION(
      bool * pb_finished,
      gta_errinfo_t * p_errinfo))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 GTA_DEFINE_FUNCTION(
@@ -625,13 +593,7 @@ GTA_DEFINE_FUNCTION(
      bool * pb_finished,
      gta_errinfo_t * p_errinfo))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 GTA_DEFINE_FUNCTION(
@@ -639,13 +601,7 @@ GTA_DEFINE_FUNCTION(
     unittest_provider_gta_security_association_destroy,
     (gta_context_handle_t h_ctx, gta_errinfo_t * p_errinfo))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 GTA_DEFINE_FUNCTION(
@@ -653,13 +609,7 @@ GTA_DEFINE_FUNCTION(
     unittest_provider_gta_seal_message,
     (gta_context_handle_t h_ctx, gtaio_istream_t * msg, gtaio_ostream_t * sealed_msg, gta_errinfo_t * p_errinfo))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 GTA_DEFINE_FUNCTION(
@@ -667,27 +617,15 @@ GTA_DEFINE_FUNCTION(
     unittest_provider_gta_unseal_message,
     (gta_context_handle_t h_ctx, gtaio_istream_t * sealed_msg, gtaio_ostream_t * msg, gta_errinfo_t * p_errinfo))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 GTA_DEFINE_FUNCTION(
     bool,
     unittest_provider_gta_get_random_bytes,
-    (size_t num_bytes, gtaio_ostream_t * rnd_stream, gta_errinfo_t * p_errinfo))
+    (gta_instance_handle_t h_inst, size_t num_bytes, gtaio_ostream_t * rnd_stream, gta_errinfo_t * p_errinfo))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 GTA_DEFINE_FUNCTION(
@@ -698,13 +636,7 @@ GTA_DEFINE_FUNCTION(
      gtaio_ostream_t * attestation_data,
      gta_errinfo_t * p_errinfo))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 GTA_DEFINE_FUNCTION(
@@ -712,13 +644,7 @@ GTA_DEFINE_FUNCTION(
     unittest_provider_gta_trustex_function_install,
     (const char * function_name, gta_profile_name_t profile_name, gtaio_istream_t function, gta_errinfo_t * p_errinfo))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 GTA_DEFINE_FUNCTION(
@@ -726,13 +652,7 @@ GTA_DEFINE_FUNCTION(
     unittest_provider_gta_trustex_function_uninstall,
     (const char * function_name, gta_errinfo_t * p_errinfo))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 GTA_DEFINE_FUNCTION(
@@ -744,13 +664,7 @@ GTA_DEFINE_FUNCTION(
      gtaio_ostream_t output,
      gta_errinfo_t * p_errinfo))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 GTA_DEFINE_FUNCTION(
@@ -758,13 +672,7 @@ GTA_DEFINE_FUNCTION(
     unittest_provider_gta_trustex_function_terminate,
     (gta_handle_t function_handle, gta_errinfo_t * p_errinfo))
 {
-    bool ret = false;
-
-    *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
-
-    /* ... */
-
-    return ret;
+    return true;
 }
 
 static const struct gta_function_list_t g_my_function_list = {

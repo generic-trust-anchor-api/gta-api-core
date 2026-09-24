@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2024-2025 Siemens
+ * SPDX-FileCopyrightText: Copyright 2024-2026 Siemens
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -466,6 +466,7 @@ static void test_gta_access_policy(void ** state)
 
     /* enumerate the tokens in the access policy */
     h_enum = GTA_HANDLE_ENUM_FIRST;
+    assert_false(gta_access_policy_enumerate(h_access_policy, NULL, &h_access_token_descriptor, &errinfo));
     do {
 #if 0
         gta_enum_handle_t h_enum_invalid
@@ -1126,7 +1127,26 @@ static void test_gta_devicestate_recede(void ** state)
     assert_true(gta_devicestate_recede(framework_test_params->h_inst, recede_token, &errinfo));
 }
 
-static void test_gta_devicestate_attestate(void ** state) { /* todo */ }
+static void test_gta_devicestate_attestate(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gtaio_istream_t nonce = {0};
+    gtaio_ostream_t attestation_data = {0};
+    gta_errinfo_t errinfo = 0;
+
+    assert_false(gta_devicestate_attestate(NULL, NULL, NULL, NULL));
+
+    assert_false(gta_devicestate_attestate(NULL, &nonce, &attestation_data, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_false(gta_devicestate_attestate(framework_test_params->h_ctx, NULL, &attestation_data, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_devicestate_attestate(framework_test_params->h_ctx, &nonce, NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_true(gta_devicestate_attestate(framework_test_params->h_ctx, &nonce, &attestation_data, &errinfo));
+}
 
 static void test_gta_personality_enumerate_application(void ** state)
 {
@@ -1187,15 +1207,53 @@ static void test_gta_personality_enroll(void ** state)
     assert_true(gta_personality_enroll(framework_test_params->h_ctx, &enrollment_info, &errinfo));
 }
 
-static void test_gta_personality_enroll_auth(void ** state) { /* todo */ }
+static void test_gta_personality_enroll_auth(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gtaio_ostream_t enrollment_info = {0};
+    gta_errinfo_t errinfo = 0;
 
-static void test_gta_personality_attestate(void ** state) { /* todo */ }
+    assert_false(gta_personality_enroll_auth(NULL, NULL, NULL, NULL));
 
-static void test_gta_personality_remove(void ** state) { /* todo */ }
+    assert_false(gta_personality_enroll_auth(NULL, framework_test_params->h_ctx_mutex, &enrollment_info, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-static void test_gta_personality_deactivate(void ** state) { /* todo */ }
+    assert_false(gta_personality_enroll_auth(framework_test_params->h_ctx, NULL, &enrollment_info, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-static void test_gta_personality_activate(void ** state) { /* todo */ }
+    assert_false(
+        gta_personality_enroll_auth(framework_test_params->h_ctx, framework_test_params->h_ctx_mutex, NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_true(gta_personality_enroll_auth(
+        framework_test_params->h_ctx, framework_test_params->h_ctx_mutex, &enrollment_info, &errinfo));
+}
+
+static void test_gta_personality_attestate(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gtaio_istream_t nonce = {0};
+    gtaio_ostream_t attestation_data = {0};
+    gta_errinfo_t errinfo = 0;
+
+    assert_false(gta_personality_attestate(NULL, NULL, NULL, NULL, NULL));
+
+    assert_false(gta_personality_attestate(NULL, "personality", &nonce, &attestation_data, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_false(gta_personality_attestate(framework_test_params->h_ctx, NULL, &nonce, &attestation_data, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(
+        gta_personality_attestate(framework_test_params->h_ctx, "personality", NULL, &attestation_data, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_personality_attestate(framework_test_params->h_ctx, "personality", &nonce, NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_true(
+        gta_personality_attestate(framework_test_params->h_ctx, "personality", &nonce, &attestation_data, &errinfo));
+}
 
 static void test_gta_personality_add_trusted_attribute(void ** state)
 {
@@ -1433,17 +1491,148 @@ static void test_gta_verify_data_detached(void ** state)
     assert_true(gta_verify_data_detached(framework_test_params->h_ctx, &data, &seal, &errinfo));
 }
 
-static void test_gta_security_association_initialize(void ** state) { /* todo */ }
+static void test_gta_security_association_initialize(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gtaio_istream_t in = {0};
+    gtaio_ostream_t out = {0};
+    bool b_finished = false;
+    gta_errinfo_t errinfo = 0;
 
-static void test_gta_security_association_accept(void ** state) { /* todo */ }
+    assert_false(gta_security_association_initialize(NULL, NULL, NULL, NULL, NULL));
 
-static void test_gta_security_association_destroy(void ** state) { /* todo */ }
+    assert_false(gta_security_association_initialize(NULL, &in, &out, &b_finished, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
 
-static void test_gta_seal_message(void ** state) { /* todo */ }
+    assert_false(gta_security_association_initialize(framework_test_params->h_ctx, NULL, &out, &b_finished, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-static void test_gta_unseal_message(void ** state) { /* todo */ }
+    assert_false(gta_security_association_initialize(framework_test_params->h_ctx, &in, NULL, &b_finished, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
 
-static void test_gta_get_random_bytes(void ** state) { /* todo */ }
+    assert_false(gta_security_association_initialize(framework_test_params->h_ctx, &in, &out, NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_true(gta_security_association_initialize(framework_test_params->h_ctx, &in, &out, &b_finished, &errinfo));
+}
+
+static void test_gta_security_association_accept(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gtaio_istream_t in = {0};
+    gtaio_ostream_t out = {0};
+    bool b_finished = false;
+    gta_errinfo_t errinfo = 0;
+
+    assert_false(gta_security_association_accept(NULL, NULL, NULL, NULL, NULL));
+
+    assert_false(gta_security_association_accept(NULL, &in, &out, &b_finished, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_false(gta_security_association_accept(framework_test_params->h_ctx, NULL, &out, &b_finished, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_security_association_accept(framework_test_params->h_ctx, &in, NULL, &b_finished, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_security_association_accept(framework_test_params->h_ctx, &in, &out, NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_true(gta_security_association_accept(framework_test_params->h_ctx, &in, &out, &b_finished, &errinfo));
+}
+
+static void test_gta_security_association_destroy(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+
+    assert_false(gta_security_association_destroy(NULL, NULL));
+
+    assert_false(gta_security_association_destroy(NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_true(gta_security_association_destroy(framework_test_params->h_ctx, &errinfo));
+}
+
+static void test_gta_seal_message(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gtaio_istream_t msg = {0};
+    gtaio_ostream_t sealed_msg = {0};
+    gta_errinfo_t errinfo = 0;
+
+    assert_false(gta_seal_message(NULL, NULL, NULL, NULL));
+
+    assert_false(gta_seal_message(NULL, &msg, &sealed_msg, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_false(gta_seal_message(framework_test_params->h_ctx, NULL, &sealed_msg, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_seal_message(framework_test_params->h_ctx, &msg, NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_true(gta_seal_message(framework_test_params->h_ctx, &msg, &sealed_msg, &errinfo));
+}
+
+static void test_gta_unseal_message(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gtaio_istream_t sealed_msg = {0};
+    gtaio_ostream_t msg = {0};
+    gta_errinfo_t errinfo = 0;
+
+    assert_false(gta_unseal_message(NULL, NULL, NULL, NULL));
+
+    assert_false(gta_unseal_message(NULL, &sealed_msg, &msg, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_false(gta_unseal_message(framework_test_params->h_ctx, NULL, &msg, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_unseal_message(framework_test_params->h_ctx, &sealed_msg, NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_true(gta_unseal_message(framework_test_params->h_ctx, &sealed_msg, &msg, &errinfo));
+}
+
+static void test_gta_get_random_bytes(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gtaio_ostream_t rnd_stream = {0};
+    gta_errinfo_t errinfo = 0;
+
+    assert_false(gta_get_random_bytes(NULL, 10, NULL, NULL));
+
+    assert_false(gta_get_random_bytes(NULL, 10, &rnd_stream, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_false(gta_get_random_bytes(framework_test_params->h_inst, 10, NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_true(gta_get_random_bytes(framework_test_params->h_inst, 10, &rnd_stream, &errinfo));
+}
+
+static void test_gta_attestate(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gtaio_istream_t nonce = {0};
+    gtaio_ostream_t attestation_data = {0};
+    gta_errinfo_t errinfo = 0;
+
+    assert_false(gta_attestate(NULL, NULL, NULL, NULL));
+
+    assert_false(gta_attestate(NULL, &nonce, &attestation_data, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_HANDLE_INVALID);
+
+    assert_false(gta_attestate(framework_test_params->h_ctx, NULL, &attestation_data, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_false(gta_attestate(framework_test_params->h_ctx, &nonce, NULL, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INVALID_PARAMETER);
+
+    assert_true(gta_attestate(framework_test_params->h_ctx, &nonce, &attestation_data, &errinfo));
+}
 
 static void test_gta_trustex_function_install(void ** state) { /* todo */ }
 
@@ -1600,28 +1789,24 @@ int ts_framework(void)
         cmocka_unit_test(test_gta_context_get_provider_params),
         cmocka_unit_test(test_gta_context_get_params),
         cmocka_unit_test(test_gta_provider_get_params),
-        cmocka_unit_test(test_gta_context_get_attribute),
-        cmocka_unit_test(test_gta_context_set_attribute),
-        cmocka_unit_test(test_gta_devicestate_transition),
-        cmocka_unit_test(test_gta_devicestate_recede),
         cmocka_unit_test(test_gta_access_policy),
         cmocka_unit_test(test_gta_access_token_get_physical_presence),
         cmocka_unit_test(test_gta_access_token_get_issuing),
         cmocka_unit_test(test_gta_access_token_get_basic),
         cmocka_unit_test(test_gta_access_token_get_pers_derived),
         cmocka_unit_test(test_gta_access_token_revoke),
-        /* TODO */
         cmocka_unit_test(test_gta_context_auth_set_access_token),
         cmocka_unit_test(test_gta_context_auth_get_challenge),
         cmocka_unit_test(test_gta_context_auth_set_random),
+        cmocka_unit_test(test_gta_context_get_attribute),
+        cmocka_unit_test(test_gta_context_set_attribute),
+        cmocka_unit_test(test_gta_devicestate_transition),
+        cmocka_unit_test(test_gta_devicestate_recede),
         cmocka_unit_test(test_gta_devicestate_attestate),
         cmocka_unit_test(test_gta_personality_enumerate_application),
         cmocka_unit_test(test_gta_personality_enroll),
         cmocka_unit_test(test_gta_personality_enroll_auth),
         cmocka_unit_test(test_gta_personality_attestate),
-        cmocka_unit_test(test_gta_personality_remove),
-        cmocka_unit_test(test_gta_personality_deactivate),
-        cmocka_unit_test(test_gta_personality_activate),
         cmocka_unit_test(test_gta_personality_add_trusted_attribute),
         cmocka_unit_test(test_gta_personality_add_attribute),
         cmocka_unit_test(test_gta_personality_get_attribute),
@@ -1640,6 +1825,8 @@ int ts_framework(void)
         cmocka_unit_test(test_gta_seal_message),
         cmocka_unit_test(test_gta_unseal_message),
         cmocka_unit_test(test_gta_get_random_bytes),
+        cmocka_unit_test(test_gta_attestate),
+        /* todo */
         cmocka_unit_test(test_gta_trustex_function_install),
         cmocka_unit_test(test_gta_trustex_function_uninstall),
         cmocka_unit_test(test_gta_trustex_function_execute),
