@@ -1734,6 +1734,53 @@ static void test_gta_personality_enumerate_application_wo_provider(void ** state
     assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
 }
 
+static void test_gta_personality_attributes_enumerate_wo_provider(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gta_enum_handle_t h_enum = GTA_HANDLE_ENUM_FIRST;
+    gtaio_ostream_t attribute_type = {0};
+    gtaio_ostream_t attribute_name = {0};
+
+    assert_false(gta_personality_attributes_enumerate(
+        framework_test_params->h_inst, "application", &h_enum, &attribute_type, &attribute_name, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
+}
+
+static void test_gta_devicestate_transition_wo_provider(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gta_access_policy_handle_t h_auth_recede = GTA_HANDLE_INVALID;
+
+    h_auth_recede = gta_access_policy_simple(
+        framework_test_params->h_inst, GTA_ACCESS_DESCRIPTOR_TYPE_PHYSICAL_PRESENCE_TOKEN, &errinfo);
+    assert_non_null(h_auth_recede);
+
+    assert_false(gta_devicestate_transition(framework_test_params->h_inst, h_auth_recede, 0, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
+}
+
+static void test_gta_devicestate_recede_wo_provider(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gta_access_token_t recede_token = {0};
+
+    assert_false(gta_devicestate_recede(framework_test_params->h_inst, recede_token, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
+}
+
+static void test_gta_get_random_bytes_wo_provider(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gtaio_ostream_t rnd_stream = {0};
+
+    assert_false(gta_get_random_bytes(framework_test_params->h_inst, 10, &rnd_stream, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
+}
+
 static void test_gta_context_open_wo_provider(void ** state)
 {
     struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
@@ -1742,6 +1789,54 @@ static void test_gta_context_open_wo_provider(void ** state)
     framework_test_params->h_ctx =
         gta_context_open(framework_test_params->h_inst, "personality2", "profile1", &errinfo);
     assert_null(framework_test_params->h_ctx);
+}
+
+static void test_gta_access_token_get_physical_presence_wo_provider(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gta_access_token_t physical_presence_token = {0};
+
+    assert_false(
+        gta_access_token_get_physical_presence(framework_test_params->h_inst, physical_presence_token, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
+}
+
+static void test_gta_access_token_get_issuing_wo_provider(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gta_access_token_t granting_token = {0};
+
+    assert_false(gta_access_token_get_issuing(framework_test_params->h_inst, granting_token, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
+}
+
+static void test_gta_access_token_get_basic_wo_provider(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gta_access_token_t granting_token = {0};
+    gta_access_token_t token = {0};
+
+    assert_false(gta_access_token_get_basic(
+        framework_test_params->h_inst,
+        granting_token,
+        "personality_name",
+        GTA_ACCESS_TOKEN_USAGE_USE,
+        token,
+        &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
+}
+
+static void test_gta_access_token_revoke_wo_provider(void ** state)
+{
+    struct framework_test_params_t * framework_test_params = (struct framework_test_params_t *)(*state);
+    gta_errinfo_t errinfo = 0;
+    gta_access_token_t token = {0};
+
+    assert_false(gta_access_token_revoke(framework_test_params->h_inst, token, &errinfo));
+    assert_int_equal(errinfo, GTA_ERROR_INTERNAL_ERROR);
 }
 
 static void test_gta_list(void ** state)
@@ -1845,7 +1940,15 @@ int framework_exceptions(void)
         cmocka_unit_test(test_gta_personality_deploy_wo_provider),
         cmocka_unit_test(test_gta_personality_enumerate_wo_provider),
         cmocka_unit_test(test_gta_personality_enumerate_application_wo_provider),
+        cmocka_unit_test(test_gta_personality_attributes_enumerate_wo_provider),
+        cmocka_unit_test(test_gta_devicestate_transition_wo_provider),
+        cmocka_unit_test(test_gta_devicestate_recede_wo_provider),
+        cmocka_unit_test(test_gta_get_random_bytes_wo_provider),
         cmocka_unit_test(test_gta_context_open_wo_provider),
+        cmocka_unit_test(test_gta_access_token_get_physical_presence_wo_provider),
+        cmocka_unit_test(test_gta_access_token_get_issuing_wo_provider),
+        cmocka_unit_test(test_gta_access_token_get_basic_wo_provider),
+        cmocka_unit_test(test_gta_access_token_revoke_wo_provider),
     };
 
     return cmocka_run_group_tests(tests_framework_exceptions, init_suite_framework_exceptions, clean_suite_framework);

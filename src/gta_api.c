@@ -840,6 +840,11 @@ GTA_DEFINE_FUNCTION(
          * "hack" assumes that only one provider is registered and therefore
          * simply the first provider in the list is selected.
          */
+        /* Check if the provider list is empty */
+        if (NULL == p_inst_obj->p_provider_list) {
+            *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
+            return false;
+        }
         p_provider_list_item = p_inst_obj->p_provider_list;
         h_inst_provider =
             alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER, p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
@@ -881,6 +886,11 @@ GTA_DEFINE_FUNCTION(
          * "hack" assumes that only one provider is registered and therefore
          * simply the first provider in the list is selected.
          */
+        /* Check if the provider list is empty */
+        if (NULL == p_inst_obj->p_provider_list) {
+            *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
+            return false;
+        }
         p_provider_list_item = p_inst_obj->p_provider_list;
         h_inst_provider =
             alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER, p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
@@ -931,6 +941,11 @@ GTA_DEFINE_FUNCTION(
          * "hack" assumes that only one provider is registered and therefore
          * simply the first provider in the list is selected.
          */
+        /* Check if the provider list is empty */
+        if (NULL == p_inst_obj->p_provider_list) {
+            *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
+            return false;
+        }
         p_provider_list_item = p_inst_obj->p_provider_list;
         h_inst_provider =
             alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER, p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
@@ -1014,6 +1029,11 @@ GTA_DEFINE_FUNCTION(
          * "hack" assumes that only one provider is registered and therefore
          * simply the first provider in the list is selected.
          */
+        /* Check if the provider list is empty */
+        if (NULL == p_inst_obj->p_provider_list) {
+            *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
+            return false;
+        }
         p_provider_list_item = p_inst_obj->p_provider_list;
         h_inst_provider =
             alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER, p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
@@ -1162,6 +1182,11 @@ GTA_DEFINE_FUNCTION(
     p_inst_obj = check_instance_handle(h_inst, p_errinfo);
 
     if (NULL != p_inst_obj) {
+        /* Check if the provider list is empty */
+        if (NULL == p_inst_obj->p_provider_list) {
+            *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
+            return false;
+        }
         /* Check h_auth_recede */
         if (NULL != check_access_policy_handle(h_auth_recede, true, p_errinfo)) {
             /* wrap h_inst */
@@ -1210,6 +1235,11 @@ GTA_DEFINE_FUNCTION(
     p_inst_obj = check_instance_handle(h_inst, p_errinfo);
 
     if (NULL != p_inst_obj) {
+        /* Check if the provider list is empty */
+        if (NULL == p_inst_obj->p_provider_list) {
+            *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
+            return false;
+        }
         /* wrap h_inst */
         p_provider_list_item = p_inst_obj->p_provider_list;
         h_inst_provider =
@@ -2607,6 +2637,11 @@ GTA_DEFINE_FUNCTION(
     p_inst_obj = check_instance_handle(h_inst, p_errinfo);
 
     if (NULL != p_inst_obj) {
+        /* Check if the provider list is empty */
+        if (NULL == p_inst_obj->p_provider_list) {
+            *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
+            return false;
+        }
         /* Find provider holding the personality in question */
         if ((find_personality(h_inst, personality_name, &p_provider_list_item, &errinfo)) &&
             (NULL != p_provider_list_item)) {
@@ -2850,6 +2885,13 @@ GTA_DEFINE_FUNCTION(
          * "hack" assumes that only one provider is registered and therefore
          * simply the first provider in the list is selected.
          */
+
+        /* Check if the provider list is empty */
+        if (NULL == p_inst_obj->p_provider_list) {
+            *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
+            return false;
+        }
+
         p_provider_list_item = p_inst_obj->p_provider_list;
         h_inst_provider =
             alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER, p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
