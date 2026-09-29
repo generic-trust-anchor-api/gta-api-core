@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright 2024 Siemens
+# SPDX-FileCopyrightText: Copyright 2024-2026 Siemens
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -8,6 +8,9 @@ source_url = https://standards.iso.org/iso-iec/ts/30168/ed-1/en/ISO_IEC_TS_30168
 source_filename = ISO_IEC_TS_30168_ed-1.zip
 source_hash = 403ff15750078c1107f3700336530303f8eb8634d6766d2286650708f12a083a
 patch_directory = gta_headers
+
+# Apply patch file
+diff_files = gta_headers/fix_gta_get_random_bytes.patch
 
 [provide]
 gta_headers = gta_header_dep

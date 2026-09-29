@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright 2024 Siemens
+# SPDX-FileCopyrightText: Copyright 2024-2026 Siemens
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -11,7 +11,7 @@ project('Generic Trust Anchor API Core',
         'buildtype=plain',
     ],
     license: 'Apache-2.0',
-    meson_version: '>=0.56.0',
+    meson_version: '>=0.63.0',
     version: '0.1'
 )
 

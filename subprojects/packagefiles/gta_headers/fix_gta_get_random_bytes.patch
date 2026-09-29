@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright 2026 Siemens
+#
+# SPDX-License-Identifier: Apache-2.0
+
+--- a/gta_apif.h
++++ b/gta_apif.h
+@@ -1441,6 +1441,7 @@
+   */
+ GTA_FUNCTION_INFO(bool, gta_get_random_bytes,
+ (
++    gta_instance_handle_t h_inst,
+     size_t num_bytes,
+     gtaio_ostream_t * rnd_stream,
+     gta_errinfo_t * p_errinfo

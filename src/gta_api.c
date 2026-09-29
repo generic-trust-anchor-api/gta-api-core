@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2024-2025 Siemens
+ * SPDX-FileCopyrightText: Copyright 2024-2026 Siemens
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -840,6 +840,11 @@ GTA_DEFINE_FUNCTION(
          * "hack" assumes that only one provider is registered and therefore
          * simply the first provider in the list is selected.
          */
+        /* Check if the provider list is empty */
+        if (NULL == p_inst_obj->p_provider_list) {
+            *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
+            return false;
+        }
         p_provider_list_item = p_inst_obj->p_provider_list;
         h_inst_provider =
             alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER, p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
@@ -881,6 +886,11 @@ GTA_DEFINE_FUNCTION(
          * "hack" assumes that only one provider is registered and therefore
          * simply the first provider in the list is selected.
          */
+        /* Check if the provider list is empty */
+        if (NULL == p_inst_obj->p_provider_list) {
+            *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
+            return false;
+        }
         p_provider_list_item = p_inst_obj->p_provider_list;
         h_inst_provider =
             alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER, p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
@@ -931,6 +941,11 @@ GTA_DEFINE_FUNCTION(
          * "hack" assumes that only one provider is registered and therefore
          * simply the first provider in the list is selected.
          */
+        /* Check if the provider list is empty */
+        if (NULL == p_inst_obj->p_provider_list) {
+            *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
+            return false;
+        }
         p_provider_list_item = p_inst_obj->p_provider_list;
         h_inst_provider =
             alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER, p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
@@ -1014,6 +1029,11 @@ GTA_DEFINE_FUNCTION(
          * "hack" assumes that only one provider is registered and therefore
          * simply the first provider in the list is selected.
          */
+        /* Check if the provider list is empty */
+        if (NULL == p_inst_obj->p_provider_list) {
+            *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
+            return false;
+        }
         p_provider_list_item = p_inst_obj->p_provider_list;
         h_inst_provider =
             alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER, p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
@@ -1162,6 +1182,11 @@ GTA_DEFINE_FUNCTION(
     p_inst_obj = check_instance_handle(h_inst, p_errinfo);
 
     if (NULL != p_inst_obj) {
+        /* Check if the provider list is empty */
+        if (NULL == p_inst_obj->p_provider_list) {
+            *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
+            return false;
+        }
         /* Check h_auth_recede */
         if (NULL != check_access_policy_handle(h_auth_recede, true, p_errinfo)) {
             /* wrap h_inst */
@@ -1210,6 +1235,11 @@ GTA_DEFINE_FUNCTION(
     p_inst_obj = check_instance_handle(h_inst, p_errinfo);
 
     if (NULL != p_inst_obj) {
+        /* Check if the provider list is empty */
+        if (NULL == p_inst_obj->p_provider_list) {
+            *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
+            return false;
+        }
         /* wrap h_inst */
         p_provider_list_item = p_inst_obj->p_provider_list;
         h_inst_provider =
@@ -1228,6 +1258,26 @@ GTA_DEFINE_FUNCTION(
     }
 
     return b_ret;
+}
+
+GTA_DEFINE_FUNCTION(
+    bool,
+    gta_devicestate_attestate,
+    (gta_context_handle_t h_ctx, gtaio_istream_t * nonce, gtaio_ostream_t * attestation, gta_errinfo_t * p_errinfo))
+{
+    const context_object_t * p_ctx_obj = NULL_PTR;
+
+    if (true != basic_pointer_validation(p_errinfo, nonce, attestation)) {
+        return false;
+    }
+
+    p_ctx_obj = check_context_handle(h_ctx, p_errinfo);
+    if (NULL != p_ctx_obj) {
+        return GTA_PROVIDER_FWD_FUNCTION(
+            p_ctx_obj->p_provider, gta_devicestate_attestate, (h_ctx, nonce, attestation, p_errinfo));
+    }
+    *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    return false;
 }
 
 GTA_DEFINE_FUNCTION(void *, gta_context_get_provider_params, (gta_context_handle_t h_ctx, gta_errinfo_t * p_errinfo))
@@ -2329,6 +2379,59 @@ GTA_DEFINE_FUNCTION(
     return false;
 }
 
+GTA_DEFINE_FUNCTION(
+    bool,
+    gta_personality_enroll_auth,
+    (gta_context_handle_t h_ctx,
+     gta_context_handle_t h_auth_ctx,
+     gtaio_ostream_t * p_personality_enrollment_info,
+     gta_errinfo_t * p_errinfo))
+{
+    const context_object_t * p_ctx_obj = NULL_PTR;
+    const context_object_t * p_auth_ctx_obj = NULL_PTR;
+
+    if (true != basic_pointer_validation(p_errinfo, p_personality_enrollment_info)) {
+        return false;
+    }
+
+    p_ctx_obj = check_context_handle(h_ctx, p_errinfo);
+    p_auth_ctx_obj = check_context_handle(h_auth_ctx, p_errinfo);
+    if ((NULL != p_ctx_obj) && (NULL != p_auth_ctx_obj)) {
+        return GTA_PROVIDER_FWD_FUNCTION(
+            p_ctx_obj->p_provider,
+            gta_personality_enroll_auth,
+            (h_ctx, h_auth_ctx, p_personality_enrollment_info, p_errinfo));
+    }
+    *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    return false;
+}
+
+GTA_DEFINE_FUNCTION(
+    bool,
+    gta_personality_attestate,
+    (gta_context_handle_t h_ctx,
+     const gta_personality_name_t personality_name,
+     gtaio_istream_t * nonce,
+     gtaio_ostream_t * attestation_data,
+     gta_errinfo_t * p_errinfo))
+{
+    const context_object_t * p_ctx_obj = NULL_PTR;
+
+    if (true != basic_pointer_validation(p_errinfo, personality_name, nonce, attestation_data)) {
+        return false;
+    }
+
+    p_ctx_obj = check_context_handle(h_ctx, p_errinfo);
+    if (NULL != p_ctx_obj) {
+        return GTA_PROVIDER_FWD_FUNCTION(
+            p_ctx_obj->p_provider,
+            gta_personality_attestate,
+            (h_ctx, personality_name, nonce, attestation_data, p_errinfo));
+    }
+    *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    return false;
+}
+
 GTA_DEFINE_FUNCTION(bool, gta_personality_remove, (gta_context_handle_t h_ctx, gta_errinfo_t * p_errinfo))
 {
     const context_object_t * p_ctx_obj = NULL_PTR;
@@ -2534,6 +2637,11 @@ GTA_DEFINE_FUNCTION(
     p_inst_obj = check_instance_handle(h_inst, p_errinfo);
 
     if (NULL != p_inst_obj) {
+        /* Check if the provider list is empty */
+        if (NULL == p_inst_obj->p_provider_list) {
+            *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
+            return false;
+        }
         /* Find provider holding the personality in question */
         if ((find_personality(h_inst, personality_name, &p_provider_list_item, &errinfo)) &&
             (NULL != p_provider_list_item)) {
@@ -2647,6 +2755,178 @@ GTA_DEFINE_FUNCTION(
     if (p_ctx_obj) {
         return GTA_PROVIDER_FWD_FUNCTION(
             p_ctx_obj->p_provider, gta_verify_data_detached, (h_ctx, data, seal, p_errinfo));
+    }
+    *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    return false;
+}
+
+GTA_DEFINE_FUNCTION(
+    bool,
+    gta_security_association_initialize,
+    (gta_context_handle_t h_ctx,
+     gtaio_istream_t * in,
+     gtaio_ostream_t * out,
+     bool * pb_finished,
+     gta_errinfo_t * p_errinfo))
+{
+    const context_object_t * p_ctx_obj = NULL_PTR;
+
+    if (true != basic_pointer_validation(p_errinfo, in, out, pb_finished)) {
+        return false;
+    }
+
+    p_ctx_obj = check_context_handle(h_ctx, p_errinfo);
+    if (p_ctx_obj) {
+        return GTA_PROVIDER_FWD_FUNCTION(
+            p_ctx_obj->p_provider, gta_security_association_initialize, (h_ctx, in, out, pb_finished, p_errinfo));
+    }
+    *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    return false;
+}
+
+GTA_DEFINE_FUNCTION(
+    bool,
+    gta_security_association_accept,
+    (gta_context_handle_t h_ctx,
+     gtaio_istream_t * in,
+     gtaio_ostream_t * out,
+     bool * pb_finished,
+     gta_errinfo_t * p_errinfo))
+{
+    const context_object_t * p_ctx_obj = NULL_PTR;
+
+    if (true != basic_pointer_validation(p_errinfo, in, out, pb_finished)) {
+        return false;
+    }
+
+    p_ctx_obj = check_context_handle(h_ctx, p_errinfo);
+    if (p_ctx_obj) {
+        return GTA_PROVIDER_FWD_FUNCTION(
+            p_ctx_obj->p_provider, gta_security_association_accept, (h_ctx, in, out, pb_finished, p_errinfo));
+    }
+    *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    return false;
+}
+
+GTA_DEFINE_FUNCTION(bool, gta_security_association_destroy, (gta_context_handle_t h_ctx, gta_errinfo_t * p_errinfo))
+{
+    const context_object_t * p_ctx_obj = NULL_PTR;
+
+    if (true != basic_pointer_validation(p_errinfo)) {
+        return false;
+    }
+
+    p_ctx_obj = check_context_handle(h_ctx, p_errinfo);
+    if (p_ctx_obj) {
+        return GTA_PROVIDER_FWD_FUNCTION(p_ctx_obj->p_provider, gta_security_association_destroy, (h_ctx, p_errinfo));
+    }
+    *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    return false;
+}
+
+GTA_DEFINE_FUNCTION(
+    bool,
+    gta_seal_message,
+    (gta_context_handle_t h_ctx, gtaio_istream_t * msg, gtaio_ostream_t * sealed_msg, gta_errinfo_t * p_errinfo))
+{
+    const context_object_t * p_ctx_obj = NULL_PTR;
+
+    if (true != basic_pointer_validation(p_errinfo, msg, sealed_msg)) {
+        return false;
+    }
+
+    p_ctx_obj = check_context_handle(h_ctx, p_errinfo);
+    if (p_ctx_obj) {
+        return GTA_PROVIDER_FWD_FUNCTION(p_ctx_obj->p_provider, gta_seal_message, (h_ctx, msg, sealed_msg, p_errinfo));
+    }
+    *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    return false;
+}
+
+GTA_DEFINE_FUNCTION(
+    bool,
+    gta_unseal_message,
+    (gta_context_handle_t h_ctx, gtaio_istream_t * sealed_msg, gtaio_ostream_t * msg, gta_errinfo_t * p_errinfo))
+{
+    const context_object_t * p_ctx_obj = NULL_PTR;
+
+    if (true != basic_pointer_validation(p_errinfo, sealed_msg, msg)) {
+        return false;
+    }
+
+    p_ctx_obj = check_context_handle(h_ctx, p_errinfo);
+    if (p_ctx_obj) {
+        return GTA_PROVIDER_FWD_FUNCTION(
+            p_ctx_obj->p_provider, gta_unseal_message, (h_ctx, sealed_msg, msg, p_errinfo));
+    }
+    *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    return false;
+}
+
+GTA_DEFINE_FUNCTION(
+    bool,
+    gta_get_random_bytes,
+    (gta_instance_handle_t h_inst, size_t num_bytes, gtaio_ostream_t * rnd_stream, gta_errinfo_t * p_errinfo))
+{
+    bool b_ret = false;
+    instance_object_t * p_inst_obj = NULL;
+    struct provider_list_item_t * p_provider_list_item = NULL_PTR;
+    gta_instance_handle_t h_inst_provider = GTA_HANDLE_INVALID;
+    struct instance_provider_object_t * p_instance_provider_obj = NULL_PTR;
+    gta_errinfo_t errinfo_tmp = GTA_ERROR_INTERNAL_ERROR;
+
+    if (true != basic_pointer_validation(p_errinfo, rnd_stream)) {
+        return false;
+    }
+
+    if ((p_inst_obj = check_instance_handle(h_inst, p_errinfo))) {
+        /* TODO: Currently it is not clear how to select the matching provider
+         * or whether forward the request to all registered providers. This
+         * "hack" assumes that only one provider is registered and therefore
+         * simply the first provider in the list is selected.
+         */
+
+        /* Check if the provider list is empty */
+        if (NULL == p_inst_obj->p_provider_list) {
+            *p_errinfo = GTA_ERROR_INTERNAL_ERROR;
+            return false;
+        }
+
+        p_provider_list_item = p_inst_obj->p_provider_list;
+        h_inst_provider =
+            alloc_handle(GTA_HANDLE_TYPE_INSTANCE_PROVIDER, p_inst_obj, (void **)(&p_instance_provider_obj), p_errinfo);
+        if (GTA_HANDLE_INVALID != h_inst_provider) {
+            p_instance_provider_obj->h_inst = h_inst;
+            p_instance_provider_obj->p_provider = p_provider_list_item;
+
+            b_ret = GTA_PROVIDER_FWD_FUNCTION(
+                p_provider_list_item, gta_get_random_bytes, (h_inst_provider, num_bytes, rnd_stream, p_errinfo));
+            free_handle(h_inst_provider, &errinfo_tmp);
+        }
+    } else {
+        *p_errinfo = GTA_ERROR_HANDLE_INVALID;
+    }
+    return b_ret;
+}
+
+GTA_DEFINE_FUNCTION(
+    bool,
+    gta_attestate,
+    (gta_context_handle_t h_ctx,
+     gtaio_istream_t * nonce,
+     gtaio_ostream_t * attestation_data,
+     gta_errinfo_t * p_errinfo))
+{
+    const context_object_t * p_ctx_obj = NULL_PTR;
+
+    if (true != basic_pointer_validation(p_errinfo, nonce, attestation_data)) {
+        return false;
+    }
+
+    p_ctx_obj = check_context_handle(h_ctx, p_errinfo);
+    if (p_ctx_obj) {
+        return GTA_PROVIDER_FWD_FUNCTION(
+            p_ctx_obj->p_provider, gta_attestate, (h_ctx, nonce, attestation_data, p_errinfo));
     }
     *p_errinfo = GTA_ERROR_HANDLE_INVALID;
     return false;
@@ -3073,7 +3353,7 @@ GTA_DEFINE_FUNCTION(
     const struct access_policy_object_t * p_access_policy_obj = NULL_PTR;
     struct access_token_descriptor_object_list_item_t * p_token_descriptor_object = NULL_PTR;
 
-    if (true != basic_pointer_validation(p_errinfo)) {
+    if (true != basic_pointer_validation(p_errinfo, ph_enum, ph_access_token_descriptor)) {
         return false;
     }
 
@@ -3081,10 +3361,6 @@ GTA_DEFINE_FUNCTION(
     p_access_policy_obj = check_access_policy_handle(h_access_policy, true, p_errinfo);
     if (NULL == p_access_policy_obj)
         return false;
-    if (NULL == ph_enum || NULL == ph_access_token_descriptor) {
-        *p_errinfo = GTA_ERROR_INVALID_PARAMETER;
-        return false;
-    }
     if (*ph_enum == GTA_HANDLE_INVALID) {
         *p_errinfo = GTA_ERROR_HANDLE_INVALID;
         return false;
