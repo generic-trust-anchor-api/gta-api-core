@@ -9,6 +9,15 @@ on:
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: deps-system
+            meson_args: '--werror'
+          - name: deps-wrap
+            meson_args: '--werror -Dbuild-dependencies=true'
+    name: build-test (${{ matrix.name }})
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
@@ -17,7 +26,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y libcmocka-dev meson ninja-build build-essential libssl-dev cmake pkg-config git valgrind
       - name: Build
         run: |
-          meson setup build --werror
+          meson setup build ${{ matrix.meson_args }}
           ninja -C build
       - name: Test
         run: |
