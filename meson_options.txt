@@ -3,4 +3,4 @@
 # SPDX-License-Identifier: Apache-2.0
 
 option('build', type : 'combo', choices : ['debug', 'release' ], value : 'debug', description : 'Select build type with associated tool configuration')
-option('build-dependencies', type : 'boolean', value : true, yield: true, description : 'Select whether to build dependencies locally rather than use system installed libraries.')
+option('build-dependencies', type : 'boolean', value : false, yield: true, description : 'Select whether to build dependencies locally rather than use system installed libraries.')
